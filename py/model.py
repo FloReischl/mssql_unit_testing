@@ -3,6 +3,7 @@ import sql
 from dbitem import DbItems
 from systype import SysType
 from procedure import Procedure, ProcParameter
+from table import Table, Column
 from typing import Any
 from pyodbc import Row
 from dbexec import DbExec
@@ -28,6 +29,18 @@ class Model:
             result.append(Procedure(row, self.schemas, pp))
         return result
     
+    def get_tables(self) -> DbItems[Table]:
+        all_cols = list[Column]()
+        for row in self.dbx.execute_fetchall(sql.SELECT_SYS_COLUMNS):
+            all_cols.append(Column(row))
+        
+        result = DbItems[Table]()
+        for row in self.dbx.execute_fetchall(sql.SELECT_SYS_TABLES):
+            object_id = row.object_id
+            cols = DbItems[Column]([x for x in all_cols if x.object_id == object_id])
+            result.append(Table(row, self.schemas, cols))
+        return result
+
     def _load_db_name(self):
         row = self.dbx.execute_fetchall(sql.SELECT_DB_NAME)[0]
         self.db_name = row.name

@@ -29,6 +29,34 @@ select
 from sys.types t;
 """
 
+SELECT_SYS_TABLES = """
+select
+    name
+    ,object_id
+    ,schema_id
+    --,*
+from sys.tables;
+"""
+
+SELECT_SYS_COLUMNS = """
+select
+    object_id
+    ,name
+    ,column_id
+    ,system_type_id
+    ,user_type_id
+    ,max_length
+    ,precision
+    ,scale
+    ,is_nullable
+    ,is_identity
+    ,is_computed
+    ,is_rowguidcol
+    --,*
+from sys.columns;
+"""
+
+
 SELECT_SYS_PROCEDURES = """
 SELECT
     p.name
@@ -55,4 +83,23 @@ SELECT
     ,p.is_nullable
 from sys.parameters p
 order by p.object_id, p.parameter_id;
+"""
+
+SELECT_OBJECT_BY_NAME_AND_SCHEMA = """
+select o.name
+from sys.all_objects o
+    join sys.schemas s on o.schema_id = s.schema_id
+where s.name = ? and o.name = ?
+"""
+
+MOCK_POSTFIX = "_hidden_781EC10A"
+
+SELECT_ALL_MOCKED_OBJECTS = f"""
+select
+    s.name schema_name
+    ,o.name object_name
+    ,o.type
+from sys.all_objects o
+    join sys.schemas s on o.schema_id = s.schema_id
+where o.name like '%´{MOCK_POSTFIX}'
 """
