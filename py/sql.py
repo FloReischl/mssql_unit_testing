@@ -1,4 +1,17 @@
 
+SELECT_DB_NAME = "SELECT DB_NAME() as name"
+
+SELECT_SYS_SCHEMAS = """
+select
+    s.schema_id
+    ,s.name
+from sys.schemas s
+where exists (
+    select *
+    from sys.objects o
+    where s.schema_id = o.schema_id
+        and o.is_ms_shipped = 0)
+"""
 
 SELECT_SYS_TYPES = """
 select

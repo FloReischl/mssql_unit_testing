@@ -1,0 +1,44 @@
+from schema import Schema
+import sql
+from dbitem import DbItems
+from systype import SysType
+from procedure import Procedure, ProcParameter
+from typing import Any
+from pyodbc import Row
+from dbexec import DbExec
+
+class Model:
+    def __init__(self, dbx: DbExec) -> None:
+        self.dbx = dbx
+        self.db_name: str = None
+        self._load_db_name()
+        self.systypes = DbItems[SysType]()
+        self._load_systypes()
+        self.schemas = DbItems[Schema]()
+        self._load_schemas()
+
+    def get_procedures(self) -> DbItems[Procedure]:
+        params = list[ProcParameter]()
+        for row in self.dbx.execute_fetchall(sql.SELECT_SYS_PARAMETERS):
+            params.append(ProcParameter(row, self.systypes))
+
+        result = DbItems[Procedure]()
+        for row in self.dbx.execute_fetchall(sql.SELECT_SYS_PROCEDURES):
+            pp = DbItems([x for x in params if x.object_id == row.object_id])
+            result.append(Procedure(row, self.schemas, pp))
+        return result
+    
+    def _load_db_name(self):
+        row = self.dbx.execute_fetchall(sql.SELECT_DB_NAME)[0]
+        self.db_name = row.name
+
+    def _load_systypes(self):
+        for row in self.dbx.execute_fetchall(sql.SELECT_SYS_TYPES):
+            self.systypes.append(SysType(row))
+        
+        for st in self.systypes:
+            st.post_init(self.systypes)
+
+    def _load_schemas(self):
+        for row in self.dbx.execute_fetchall(sql.SELECT_SYS_SCHEMAS):
+            self.schemas.append(Schema(row))

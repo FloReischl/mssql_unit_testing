@@ -1,6 +1,9 @@
 from dbitem import DbItem, DbItems
 from systype import SysType, TypeCode
 from pyodbc import Row
+from utils import quote
+from schema import Schema
+# from io import StringIO
 
 class ProcParameter(DbItem):
     def __init__(self, row: Row, systypes: DbItems[SysType]):
@@ -20,6 +23,7 @@ class ProcParameter(DbItem):
         self.is_nullable = row.is_nullable == 1
 
         self.sys_type = systypes.get_by_id(self.user_type_id)
+        self.unique_name = self.name
         self.id = self.parameter_id
 
     def __repr__(self) -> str:
@@ -40,10 +44,17 @@ class ProcParameter(DbItem):
         return f'{self.name} {t}'
 
 class Procedure(DbItem):
-    def __init__(self, row: Row, params: DbItems) -> None:
+    def __init__(self, row: Row, schemas: DbItems, params: DbItems) -> None:
         super().__init__()
         self.name = row.name
         self.object_id: int = row.object_id
         self.schema_id: int = row.schema_id
         self.type: str = row.type
+
+        self.schema: Schema = schemas.get_by_id(self.schema_id)
         self.params = list[ProcParameter](params)
+        self.id = self.object_id
+        self.unique_name = self.__repr__()
+
+    def __repr__(self) -> str:
+        return f"{repr(self.schema)}.{quote(self.name)}"

@@ -56,33 +56,36 @@ class SysType(DbItem):
 
         self.base_type: SysType = None
         self.id = self.user_type_id
+        self.unique_name = self.name
 
     def get_base_type(self):
         return self.base_type or self
     
     def post_init(self, all: DbItems[DbItem]):
-        self.base_type = self if not self.is_user_defined or self.is_table_type else all.get_by_id(self.system_type_id)
+        # self.base_type = self if not self.is_user_defined or self.is_table_type else all.get_by_id(self.system_type_id)
+        self.base_type = all.try_get_by_id(self.system_type_id) or self
+        self.base_code = self.base_type.code
 
     def is_legacy(self) -> bool:
         return self.code in [ TypeCode.DATETIME, TypeCode.IMAGE, TypeCode.TEXT, TypeCode.NTEXT ]
 
     def is_string(self) -> bool:
-        return self.code in [ TypeCode.CHAR, TypeCode.NCHAR, TypeCode.VARCHAR, TypeCode.NVARCHAR, TypeCode.TEXT, TypeCode.NTEXT ]
+        return self.base_code in [ TypeCode.CHAR, TypeCode.NCHAR, TypeCode.VARCHAR, TypeCode.NVARCHAR, TypeCode.TEXT, TypeCode.NTEXT ]
     
     def is_binary(self) -> bool:
-        return self.code in [ TypeCode.BINARY, TypeCode.VARBINARY, TypeCode.IMAGE ]
+        return self.base_code in [ TypeCode.BINARY, TypeCode.VARBINARY, TypeCode.IMAGE ]
 
     def is_number(self):
         return self.is_natural_number() or self.is_fixed_number() or self.is_floating_number()
 
     def is_natural_number(self) -> bool:
-        return self.code in [ TypeCode.BIT, TypeCode.TINYINT, TypeCode.SMALLINT, TypeCode.INT, TypeCode.BIGINT ]
+        return self.base_code in [ TypeCode.BIT, TypeCode.TINYINT, TypeCode.SMALLINT, TypeCode.INT, TypeCode.BIGINT ]
     
     def is_fixed_number(self) -> bool:
-        return self.code in [ TypeCode.DECIMAL, TypeCode.NUMERIC ]
+        return self.base_code in [ TypeCode.DECIMAL, TypeCode.NUMERIC, TypeCode.MONEY, TypeCode.SMALLMONEY ]
     
     def is_floating_number(self) -> bool:
-        return self.code in [ TypeCode.REAL, TypeCode.FLOAT ]
+        return self.base_code in [ TypeCode.REAL, TypeCode.FLOAT ]
     
     def is_date(self) -> bool:
-        return self.code in [ TypeCode.DATE, TypeCode.DATETIME, TypeCode.DATETIME2, TypeCode.DATETIMEOFFSET, TypeCode.TIME ]
+        return self.base_code in [ TypeCode.DATE, TypeCode.DATETIME, TypeCode.DATETIME2, TypeCode.DATETIMEOFFSET, TypeCode.TIME ]
