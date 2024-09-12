@@ -38,21 +38,25 @@ class TypeCode(Enum):
     XML = 241
     SYSNAME = 256
     TABLE_TYPE = 243
+    UNKNOWN = -1
 
 class SysType(DbItem):
-    def __init__(self, info: Row) -> None:
+    def __init__(self, info) -> None:
         super().__init__()
-        self.name: str = info.name
-        self.system_type_id: int = info.system_type_id
-        self.user_type_id: int = info.user_type_id
-        self.schema_id: int = info.schema_id
-        self.max_length: int = info.max_length
-        self.precision: int = info.precision
-        self.scale: int = info.scale
-        self.is_nullable: bool = info.is_nullable == 1
-        self.is_user_defined: bool = info.is_user_defined == 1
-        self.is_table_type: bool = info.is_table_type == 1
-        self.code = TypeCode.TABLE_TYPE if self.is_table_type else [x for x in list(TypeCode) if x.value == self.user_type_id][0]
+        self.name: str = info['name']
+        self.system_type_id: int = info['system_type_id']
+        self.user_type_id: int = info.array[2] # TBC! ['user_type_id']
+        self.schema_id: int = info['schema_id']
+        self.max_length: int = info['max_length']
+        self.precision: int = info['precision']
+        self.scale: int = info['scale']
+        self.is_nullable: bool = info['is_nullable'] == 1
+        self.is_user_defined: bool = info['is_user_defined'] == 1
+        self.is_table_type: bool = info['is_table_type'] == 1
+        if self.is_table_type:
+            self.code = TypeCode.TABLE_TYPE
+        else:
+            self.code = next((x for x in list(TypeCode) if x.value == self.user_type_id), TypeCode.UNKNOWN)
 
         self.base_type: SysType = None
         self.id = self.user_type_id

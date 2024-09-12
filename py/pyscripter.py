@@ -22,11 +22,11 @@ class PyScripter:
         def writeline(s: str = None): fs.write(f"{s or ''}\n")
         def write(s: str = None): fs.write(f"{s or ''}")
 
-        writeline("from dbexec import DbExec")
-        writeline("import pyodbc")
-        writeline("from typing import Any")
-        writeline("from datetime import datetime, date, time")
-        writeline("from uuid import UUID")
+        # writeline("from dbexec import DbExec")
+        # writeline("import pyodbc")
+        # writeline("from typing import Any")
+        # writeline("from datetime import datetime, date, time")
+        # writeline("from uuid import UUID")
         writeline()
         writeline(f"class {py_name(model.db_name.title())}{py_name(schema.name.title())}Tables:")
 
@@ -49,7 +49,7 @@ class PyScripter:
         def write(s: str = None):
             fs.write(f"{s or ''}")
         
-        writeline("from dbexec import DbExec")
+        writeline("from dbexec import DbExec, Result")
         writeline("import pyodbc")
         writeline("from typing import Any")
         writeline("from datetime import datetime, date, time")
@@ -71,11 +71,11 @@ class PyScripter:
                 pnames.append(pname)
                 write(", ")
                 write(f"{pname}: {self._py_param_def(param)}")
-            writeline("):")
+            writeline(") -> Result:")
             writeline("        sql = \"\"\"")
             writeline(dbs.get_exec_proc_sql(proc).strip())
             writeline("\"\"\"")
-            writeline(f"        return self.dbx.exec_result(sql, [ {", ".join(pnames)} ])")
+            writeline(f"        return self.dbx.get_result(sql, [ {", ".join(pnames)} ])")
             writeline()
 
     def _py_param_def(self, param: ProcParameter):
@@ -93,13 +93,13 @@ class PyScripter:
 
 if __name__ == "__main__":
     import myconfig
-    cnstr = myconfig.connectionString
-    cnstr = "DRIVER={SQL Server};SERVER=sqlaircyber2.munichre.com;DATABASE=dev_cyber_datapool;Trusted_Connection=True;"
+    # cnstr = myconfig.connectionString
+    cnstr = myconfig.cyber_cnstr
     db = Database(cnstr=cnstr)
     schema = db.model.schemas.get_by_name("[dbo]")
     scripter = PyScripter(db)
-    # with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\routines.py', mode='w') as fs:
-    #     s = scripter.script_schema_routines(schema, fs)
+    with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\routines.py', mode='w') as fs:
+        s = scripter.script_schema_routines(schema, fs)
 
     with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\tables.py', mode='w') as fs:
         scripter.script_schema_tables(schema, fs)

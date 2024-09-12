@@ -13,7 +13,9 @@ class Database:
 
 if __name__ == '__main__':
     from dbscripter import DbScripter
-    db = Database(myconfig.connectionString)
+    cnstr = myconfig.connectionString
+    cnstr = myconfig.sandbox_cnstr
+    db = Database(cnstr)
     procs = db.model.get_procedures()
     scripter = DbScripter(db)
     for proc in procs:
@@ -23,10 +25,9 @@ if __name__ == '__main__':
     proc = procs.get_by_name("[examples].[usp_multi_result_and_out_param]")
     sql = scripter.get_exec_proc_sql(proc)
     
-    result = db.dbx.exec_result(sql, ( 'ALFKI', None ))
-    for set in result.all_sets:
-        print(set[0].cursor_description)
-        print(set)
+    result = db.dbx.get_result(sql, ( 'ALFKI', None ))
+    for df in result.all_df:
+        print(df)
         print('\n\n')
 
     print('done')
