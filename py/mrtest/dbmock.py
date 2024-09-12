@@ -1,7 +1,7 @@
 import pyodbc
 from pyodbc import connect as odbc_connect, Row
-from utils import quote
-import sql
+from .utils import quote
+# from .sql import
 
 class DbMock:
     def __init__(self, cnstr: str, unmock_existing: bool = False) -> None:
@@ -10,20 +10,21 @@ class DbMock:
         self.faked_tables = dict()
 
     def mock_table(self, schema: str, table: str):
-        source_table = self.select_one(sql.SELECT_OBJECT_BY_NAME_AND_SCHEMA, [ schema, table ])
-        assert source_table, f"original table {table} not found!"
+        # source_table = self.select_one(SELECT_OBJECT_BY_NAME_AND_SCHEMA, [ schema, table ])
+        # assert source_table, f"original table {table} not found!"
 
-        mock_name = source_table.name + sql.MOCK_POSTFIX
+        # mock_name = source_table.name + MOCK_POSTFIX
 
-        target_table = self.select_one(sql.SELECT_OBJECT_BY_NAME_AND_SCHEMA, [schema, mock_name ])
-        assert not target_table, f"mock table {mock_name} already exists!"
+        # target_table = self.select_one(SELECT_OBJECT_BY_NAME_AND_SCHEMA, [schema, mock_name ])
+        # assert not target_table, f"mock table {mock_name} already exists!"
 
-        full_name = f"{quote(schema)}.{quote(table)}"
+        # full_name = f"{quote(schema)}.{quote(table)}"
 
-        raise Exception("self.execute_only("SELECT TOP(0) * INTO ")")
+        # raise Exception("self.execute_only(\"SELECT TOP(0) * INTO \")")
 
-        self.execute_only("EXECUTE sp_rename ?, ?", [ full_name, mock_name ])
-        
+        # self.execute_only("EXECUTE sp_rename ?, ?", [ full_name, mock_name ])
+        pass
+
     def select_one(self, sql: str, params) -> Row:
         with self.cn.execute(sql, params) as cur:
             return cur.fetchone()

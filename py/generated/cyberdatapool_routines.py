@@ -1,90 +1,19 @@
-from dbexec import DbExec, Result
+from mrtest import DbExec, Result
 import pyodbc
 from typing import Any
 from datetime import datetime, date, time
 from uuid import UUID
 
-class Dev_Cyber_DatapoolDboRoutines:
-    def __init__(self, cnstr):
-        cn = pyodbc.connect(cnstr)
+class CyberDataPoolDboRoutines:
+    def __init__(self, cn: (pyodbc.Connection | str)):
         self.dbx = DbExec(cn)
-
-    def sp_helpdiagramdefinition(self, diagramname: str, owner_id: int) -> Result:
-        sql = """
-DECLARE @_return_value INT;
-DECLARE @diagramname sysname(256) = ?;
-DECLARE @owner_id int = ?;
-
-EXECUTE [dbo].[sp_helpdiagramdefinition]
-    @diagramname = @diagramname
-    ,@owner_id = @owner_id;
-"""
-        return self.dbx.get_result(sql, [ diagramname, owner_id ])
-
-    def sp_creatediagram(self, diagramname: str, owner_id: int, version: int, definition: bytes) -> Result:
-        sql = """
-DECLARE @_return_value INT;
-DECLARE @diagramname sysname(256) = ?;
-DECLARE @owner_id int = ?;
-DECLARE @version int = ?;
-DECLARE @definition varbinary = ?;
-
-EXECUTE [dbo].[sp_creatediagram]
-    @diagramname = @diagramname
-    ,@owner_id = @owner_id
-    ,@version = @version
-    ,@definition = @definition;
-"""
-        return self.dbx.get_result(sql, [ diagramname, owner_id, version, definition ])
-
-    def sp_renamediagram(self, diagramname: str, owner_id: int, new_diagramname: str) -> Result:
-        sql = """
-DECLARE @_return_value INT;
-DECLARE @diagramname sysname(256) = ?;
-DECLARE @owner_id int = ?;
-DECLARE @new_diagramname sysname(256) = ?;
-
-EXECUTE [dbo].[sp_renamediagram]
-    @diagramname = @diagramname
-    ,@owner_id = @owner_id
-    ,@new_diagramname = @new_diagramname;
-"""
-        return self.dbx.get_result(sql, [ diagramname, owner_id, new_diagramname ])
-
-    def sp_alterdiagram(self, diagramname: str, owner_id: int, version: int, definition: bytes) -> Result:
-        sql = """
-DECLARE @_return_value INT;
-DECLARE @diagramname sysname(256) = ?;
-DECLARE @owner_id int = ?;
-DECLARE @version int = ?;
-DECLARE @definition varbinary = ?;
-
-EXECUTE [dbo].[sp_alterdiagram]
-    @diagramname = @diagramname
-    ,@owner_id = @owner_id
-    ,@version = @version
-    ,@definition = @definition;
-"""
-        return self.dbx.get_result(sql, [ diagramname, owner_id, version, definition ])
-
-    def sp_dropdiagram(self, diagramname: str, owner_id: int) -> Result:
-        sql = """
-DECLARE @_return_value INT;
-DECLARE @diagramname sysname(256) = ?;
-DECLARE @owner_id int = ?;
-
-EXECUTE [dbo].[sp_dropdiagram]
-    @diagramname = @diagramname
-    ,@owner_id = @owner_id;
-"""
-        return self.dbx.get_result(sql, [ diagramname, owner_id ])
 
     def add_Claim_BDX(self, InputTableName: str) -> Result:
         sql = """
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[add_Claim_BDX]
+EXECUTE @_return_value = [dbo].[add_Claim_BDX]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -93,7 +22,7 @@ EXECUTE [dbo].[add_Claim_BDX]
         sql = """
 DECLARE @_return_value INT;
 
-EXECUTE [dbo].[trunc_exposure_bdx];
+EXECUTE @_return_value = [dbo].[trunc_exposure_bdx];
 """
         return self.dbx.get_result(sql, [  ])
 
@@ -103,7 +32,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Policy_Type]
+EXECUTE @_return_value = [dbo].[chk_Dim_Policy_Type]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -115,7 +44,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_BI_Waiting_Period]
+EXECUTE @_return_value = [dbo].[chk_Dim_BI_Waiting_Period]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -127,7 +56,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_DnB]
+EXECUTE @_return_value = [dbo].[add_DnB]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -139,7 +68,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_DnB]
+EXECUTE @_return_value = [dbo].[upd_DnB]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -150,7 +79,7 @@ EXECUTE [dbo].[upd_DnB]
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[del_DnB]
+EXECUTE @_return_value = [dbo].[del_DnB]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -163,7 +92,7 @@ DECLARE @InputVariables nvarchar(max) = ?;
 DECLARE @checkForExisting bit = ?;
 DECLARE @suppressOutput bit = ?;
 
-EXECUTE [dbo].[add_DnB_Matching]
+EXECUTE @_return_value = [dbo].[add_DnB_Matching]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables
     ,@checkForExisting = @checkForExisting
@@ -177,7 +106,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Company_ClientInfo]
+EXECUTE @_return_value = [dbo].[upd_Company_ClientInfo]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -188,7 +117,7 @@ EXECUTE [dbo].[upd_Company_ClientInfo]
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[del_DnB_Matching]
+EXECUTE @_return_value = [dbo].[del_DnB_Matching]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -199,7 +128,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_Company_Name_Clean]
+EXECUTE @_return_value = [dbo].[add_Dim_Company_Name_Clean]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -211,7 +140,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_Company_Name_Clean]
+EXECUTE @_return_value = [dbo].[upd_Dim_Company_Name_Clean]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -223,7 +152,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_State]
+EXECUTE @_return_value = [dbo].[add_Dim_State]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -235,7 +164,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_State]
+EXECUTE @_return_value = [dbo].[upd_Dim_State]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -247,7 +176,7 @@ DECLARE @_return_value INT;
 DECLARE @target_table sysname(256) = ?;
 DECLARE @temp_table sysname(256) = ?;
 
-EXECUTE [dbo].[usp_ensure_temp_to_target_table_columns]
+EXECUTE @_return_value = [dbo].[usp_ensure_temp_to_target_table_columns]
     @target_table = @target_table
     ,@temp_table = @temp_table;
 """
@@ -259,7 +188,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Claim_Status]
+EXECUTE @_return_value = [dbo].[chk_Dim_Claim_Status]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -271,7 +200,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Loss_Event]
+EXECUTE @_return_value = [dbo].[chk_Dim_Loss_Event]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -285,7 +214,7 @@ DECLARE @ColProcessID nvarchar(100) = ?;
 DECLARE @ColReserveAmount nvarchar(100) = ?;
 DECLARE @ColSignalReserve nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Signal_Reserve]
+EXECUTE @_return_value = [dbo].[chk_Dim_Signal_Reserve]
     @InputTableName = @InputTableName
     ,@ColProcessID = @ColProcessID
     ,@ColReserveAmount = @ColReserveAmount
@@ -299,7 +228,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_Country]
+EXECUTE @_return_value = [dbo].[add_Dim_Country]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -311,7 +240,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_Country]
+EXECUTE @_return_value = [dbo].[upd_Dim_Country]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -323,7 +252,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_City]
+EXECUTE @_return_value = [dbo].[chk_Dim_City]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -335,7 +264,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Country]
+EXECUTE @_return_value = [dbo].[chk_Dim_Country]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -347,7 +276,7 @@ DECLARE @_return_value INT;
 DECLARE @Session_ID uniqueidentifier = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[usp_merge_Dim_City]
+EXECUTE @_return_value = [dbo].[usp_merge_Dim_City]
     @Session_ID = @Session_ID
     ,@InputVariables = @InputVariables;
 """
@@ -359,7 +288,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Currency]
+EXECUTE @_return_value = [dbo].[chk_Dim_Currency]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -373,7 +302,7 @@ DECLARE @ColCodeStandard nvarchar(100) = ?;
 DECLARE @ColCodeNumber nvarchar(100) = ?;
 DECLARE @ColDescription nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Industry]
+EXECUTE @_return_value = [dbo].[chk_Dim_Industry]
     @InputTableName = @InputTableName
     ,@ColCodeStandard = @ColCodeStandard
     ,@ColCodeNumber = @ColCodeNumber
@@ -389,7 +318,7 @@ DECLARE @ColCodeStandard nvarchar(100) = ?;
 DECLARE @ColCodeNumber nvarchar(100) = ?;
 DECLARE @ColDescription nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Industry_Other]
+EXECUTE @_return_value = [dbo].[chk_Dim_Industry_Other]
     @InputTableName = @InputTableName
     ,@ColCodeStandard = @ColCodeStandard
     ,@ColCodeNumber = @ColCodeNumber
@@ -404,7 +333,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColState nvarchar(100) = ?;
 DECLARE @ColCountry nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_State]
+EXECUTE @_return_value = [dbo].[chk_Dim_State]
     @InputTableName = @InputTableName
     ,@ColState = @ColState
     ,@ColCountry = @ColCountry;
@@ -417,7 +346,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_Industry]
+EXECUTE @_return_value = [dbo].[upd_Dim_Industry]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -429,7 +358,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_Industry]
+EXECUTE @_return_value = [dbo].[add_Dim_Industry]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -443,7 +372,7 @@ DECLARE @InputVariables nvarchar(max) = ?;
 DECLARE @checkForExisting bit = ?;
 DECLARE @suppressOutput bit = ?;
 
-EXECUTE [dbo].[add_File_Level_Status]
+EXECUTE @_return_value = [dbo].[add_File_Level_Status]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables
     ,@checkForExisting = @checkForExisting
@@ -457,7 +386,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @getCompanyID bit = ?;
 
-EXECUTE [dbo].[chk_DnB_Matching]
+EXECUTE @_return_value = [dbo].[chk_DnB_Matching]
     @InputTableName = @InputTableName
     ,@getCompanyID = @getCompanyID;
 """
@@ -470,7 +399,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 DECLARE @autoAdd bit = ?;
 
-EXECUTE [dbo].[upd_File_Level_Status]
+EXECUTE @_return_value = [dbo].[upd_File_Level_Status]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables
     ,@autoAdd = @autoAdd;
@@ -482,7 +411,7 @@ EXECUTE [dbo].[upd_File_Level_Status]
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[del_File_Level_Status]
+EXECUTE @_return_value = [dbo].[del_File_Level_Status]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -510,7 +439,7 @@ DECLARE @ColPolicyCleanID nvarchar(100) = ?;
 DECLARE @ColInceptionDate nvarchar(100) = ?;
 DECLARE @ColProcessID nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Claim]
+EXECUTE @_return_value = [dbo].[chk_Claim]
     @InputTableName = @InputTableName
     ,@ColID = @ColID
     ,@ColClient = @ColClient
@@ -540,7 +469,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 DECLARE @autoAdd bit = ?;
 
-EXECUTE [dbo].[upd_DnB_Matching]
+EXECUTE @_return_value = [dbo].[upd_DnB_Matching]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables
     ,@autoAdd = @autoAdd;
@@ -553,7 +482,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_Client_Name]
+EXECUTE @_return_value = [dbo].[add_Dim_Client_Name]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -565,7 +494,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_Client_Name]
+EXECUTE @_return_value = [dbo].[upd_Dim_Client_Name]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -576,7 +505,7 @@ EXECUTE [dbo].[upd_Dim_Client_Name]
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[del_Dim_Client_Name]
+EXECUTE @_return_value = [dbo].[del_Dim_Client_Name]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -600,7 +529,7 @@ DECLARE @ColDomain nvarchar(100) = ?;
 DECLARE @ColProcessID nvarchar(100) = ?;
 DECLARE @ColCompClientInfoID nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Company]
+EXECUTE @_return_value = [dbo].[chk_Company]
     @InputTableName = @InputTableName
     ,@ColID = @ColID
     ,@ColCompanyName = @ColCompanyName
@@ -630,7 +559,7 @@ DECLARE @ColCompClientInfoID nvarchar(100) = ?;
 DECLARE @ColProcessID nvarchar(100) = ?;
 DECLARE @ColDelete nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Turnover]
+EXECUTE @_return_value = [dbo].[chk_Turnover]
     @InputTableName = @InputTableName
     ,@ColCurrency = @ColCurrency
     ,@ColTurnover = @ColTurnover
@@ -647,7 +576,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_Tag_Role]
+EXECUTE @_return_value = [dbo].[add_Dim_Tag_Role]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -658,7 +587,7 @@ EXECUTE [dbo].[add_Dim_Tag_Role]
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Bridge_Portfolio_Tags]
+EXECUTE @_return_value = [dbo].[chk_Bridge_Portfolio_Tags]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -669,7 +598,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_Tag_Role]
+EXECUTE @_return_value = [dbo].[upd_Dim_Tag_Role]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -681,7 +610,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Company]
+EXECUTE @_return_value = [dbo].[add_Company]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -693,7 +622,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColNameToCheck nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Tag_Role]
+EXECUTE @_return_value = [dbo].[chk_Dim_Tag_Role]
     @InputTableName = @InputTableName
     ,@ColNameToCheck = @ColNameToCheck;
 """
@@ -705,7 +634,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColProcessID nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Client_Name]
+EXECUTE @_return_value = [dbo].[chk_Dim_Client_Name]
     @InputTableName = @InputTableName
     ,@ColProcessID = @ColProcessID;
 """
@@ -719,7 +648,7 @@ DECLARE @InputVariables nvarchar(max) = ?;
 DECLARE @checkForExisting bit = ?;
 DECLARE @suppressOutput bit = ?;
 
-EXECUTE [dbo].[add_Turnover]
+EXECUTE @_return_value = [dbo].[add_Turnover]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables
     ,@checkForExisting = @checkForExisting
@@ -733,7 +662,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Company]
+EXECUTE @_return_value = [dbo].[upd_Company]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -746,7 +675,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 DECLARE @autoAdd bit = ?;
 
-EXECUTE [dbo].[upd_Turnover]
+EXECUTE @_return_value = [dbo].[upd_Turnover]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables
     ,@autoAdd = @autoAdd;
@@ -760,7 +689,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColProcessID nvarchar(100) = ?;
 DECLARE @ColProduct nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Product]
+EXECUTE @_return_value = [dbo].[chk_Dim_Product]
     @InputTableName = @InputTableName
     ,@ColProcessID = @ColProcessID
     ,@ColProduct = @ColProduct;
@@ -772,7 +701,7 @@ EXECUTE [dbo].[chk_Dim_Product]
 DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 
-EXECUTE [dbo].[add_Exposure_BDX]
+EXECUTE @_return_value = [dbo].[add_Exposure_BDX]
     @InputTableName = @InputTableName;
 """
         return self.dbx.get_result(sql, [ InputTableName ])
@@ -783,7 +712,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_City]
+EXECUTE @_return_value = [dbo].[add_Dim_City]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -795,7 +724,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Dim_Portfolio_Tag]
+EXECUTE @_return_value = [dbo].[add_Dim_Portfolio_Tag]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -808,7 +737,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @ColTag nvarchar(100) = ?;
 DECLARE @ColTagRole nvarchar(100) = ?;
 
-EXECUTE [dbo].[chk_Dim_Portfolio_Tag]
+EXECUTE @_return_value = [dbo].[chk_Dim_Portfolio_Tag]
     @InputTableName = @InputTableName
     ,@ColTag = @ColTag
     ,@ColTagRole = @ColTagRole;
@@ -821,7 +750,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_City]
+EXECUTE @_return_value = [dbo].[upd_Dim_City]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -833,7 +762,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[upd_Dim_Portfolio_Tag]
+EXECUTE @_return_value = [dbo].[upd_Dim_Portfolio_Tag]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -845,7 +774,7 @@ DECLARE @_return_value INT;
 DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @InputVariables nvarchar(max) = ?;
 
-EXECUTE [dbo].[add_Bridge_Portfolio_Tags]
+EXECUTE @_return_value = [dbo].[add_Bridge_Portfolio_Tags]
     @InputTableName = @InputTableName
     ,@InputVariables = @InputVariables;
 """
@@ -855,7 +784,7 @@ EXECUTE [dbo].[add_Bridge_Portfolio_Tags]
         sql = """
 DECLARE @_return_value INT;
 
-EXECUTE [dbo].[sp_upgraddiagrams];
+EXECUTE @_return_value = [dbo].[sp_upgraddiagrams];
 """
         return self.dbx.get_result(sql, [  ])
 
@@ -866,7 +795,7 @@ DECLARE @InputTableName nvarchar(100) = ?;
 DECLARE @OutputTableName nvarchar(100) = ?;
 DECLARE @ColID nvarchar(100) = ?;
 
-EXECUTE [dbo].[add_BDX_data]
+EXECUTE @_return_value = [dbo].[add_BDX_data]
     @InputTableName = @InputTableName
     ,@OutputTableName = @OutputTableName
     ,@ColID = @ColID;
@@ -879,7 +808,7 @@ DECLARE @_return_value INT;
 DECLARE @diagramname sysname(256) = ?;
 DECLARE @owner_id int = ?;
 
-EXECUTE [dbo].[sp_helpdiagrams]
+EXECUTE @_return_value = [dbo].[sp_helpdiagrams]
     @diagramname = @diagramname
     ,@owner_id = @owner_id;
 """

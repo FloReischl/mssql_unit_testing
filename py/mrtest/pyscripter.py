@@ -1,34 +1,30 @@
-from io import StringIO, TextIOWrapper
-from schema import Schema
-from db import Database
-from utils import py_name
-from dbscripter import DbScripter
+from io import TextIOWrapper
+from .schema import Schema
+from .utils import py_name
+from .dbscripter import DbScripter
 from typing import Any
-from procedure import ProcParameter
-from systype import TypeCode
+from .procedure import ProcParameter
+from .systype import TypeCode
+from .dbmodel import DbModel
 
 class PyScripter:
-    def __init__(self, db: Database) -> None:
-        self.db = db
+    def __init__(self, model: DbModel) -> None:
+        self.model = model
     
     def script_all_routines(self):
-        model = self.db.model
-        for schema in model.schemas:
-            print(self.script_schema_routines(schema))
+        for schema in self.model.schemas:
+            class_name = f"{py_name(self.model.db_name.title())}{py_name(schema.name.title())}Routines"
+            print(self.script_schema_routines(class_name, schema))
 
-    def script_schema_tables(self, schema: Schema, fs: TextIOWrapper):
-        model = self.db.model
+    def script_schema_tables(self, class_name: str, schema: Schema, fs: TextIOWrapper):
+        model = self.model
 
         def writeline(s: str = None): fs.write(f"{s or ''}\n")
         def write(s: str = None): fs.write(f"{s or ''}")
 
-        # writeline("from dbexec import DbExec")
-        # writeline("import pyodbc")
-        # writeline("from typing import Any")
-        # writeline("from datetime import datetime, date, time")
-        # writeline("from uuid import UUID")
         writeline()
-        writeline(f"class {py_name(model.db_name.title())}{py_name(schema.name.title())}Tables:")
+        writeline(f"class {class_name}:")
+        # writeline(f"class {py_name(model.db_name.title())}{py_name(schema.name.title())}Tables:")
 
         tables = [x for x in model.get_tables() if x.schema_id == schema.schema_id]
         for table in tables:
@@ -41,29 +37,32 @@ class PyScripter:
                 writeline(f"        {py_name(col.name)} = '{col.name}'")
             writeline()
 
-    def script_schema_routines(self, schema: Schema, fs: TextIOWrapper):
-        model = self.db.model
+    def script_schema_routines(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):
+        ignore = ignore or set()
+        model = self.model
 
         def writeline(s: str = None):
             fs.write(f"{s or ''}\n")
         def write(s: str = None):
             fs.write(f"{s or ''}")
         
-        writeline("from dbexec import DbExec, Result")
+        writeline("from mrtest import DbExec, Result")
         writeline("import pyodbc")
         writeline("from typing import Any")
         writeline("from datetime import datetime, date, time")
         writeline("from uuid import UUID")
         writeline()
-        writeline(f"class {py_name(model.db_name.title())}{py_name(schema.name.title())}Routines:")
-        writeline("    def __init__(self, cnstr):")
-        writeline("        cn = pyodbc.connect(cnstr)")
+        writeline(f"class {class_name}:")
+        writeline("    def __init__(self, cn: (pyodbc.Connection | str)):")
+        # writeline("        cn = pyodbc.connect(cnstr)")
         writeline("        self.dbx = DbExec(cn)")
         writeline()
 
         procs = [x for x in model.get_procedures() if x.schema_id == schema.schema_id]
-        dbs = DbScripter(self.db)
+        dbs = DbScripter(self.model)
         for proc in procs:
+            if proc.name in ignore or proc.unique_name in ignore:
+                continue
             pnames = []
             write(f"    def {py_name(proc.name)}(self")
             for i,param in enumerate(proc.params):
@@ -91,16 +90,3 @@ class PyScripter:
         return "object"
 
 
-if __name__ == "__main__":
-    import myconfig
-    # cnstr = myconfig.connectionString
-    cnstr = myconfig.cyber_cnstr
-    db = Database(cnstr=cnstr)
-    schema = db.model.schemas.get_by_name("[dbo]")
-    scripter = PyScripter(db)
-    with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\routines.py', mode='w') as fs:
-        s = scripter.script_schema_routines(schema, fs)
-
-    with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\tables.py', mode='w') as fs:
-        scripter.script_schema_tables(schema, fs)
-    print('#done')

@@ -1,6 +1,6 @@
-from dbitem import DbItem, DbItems
+from .dbitem import DbItem
 from pyodbc import Row
-from utils import quote
+from .utils import quote
 
 class Schema(DbItem):
     def __init__(self, info: Row) -> None:

@@ -1,5 +1,5 @@
 
-class Dev_Cyber_DatapoolDboTables:
+class CyberDataPoolDboTables:
     class Dim_Claim_Status:
         def __str__(self): return 'Dim_Claim_Status'
         def __repr__(self): return '[dbo].[Dim_Claim_Status]'
