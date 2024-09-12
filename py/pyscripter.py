@@ -15,10 +15,34 @@ class PyScripter:
         model = self.db.model
         for schema in model.schemas:
             print(self.script_schema_routines(schema))
-    
+
+    def script_schema_tables(self, schema: Schema, fs: TextIOWrapper):
+        model = self.db.model
+
+        def writeline(s: str = None): fs.write(f"{s or ''}\n")
+        def write(s: str = None): fs.write(f"{s or ''}")
+
+        writeline("from dbexec import DbExec")
+        writeline("import pyodbc")
+        writeline("from typing import Any")
+        writeline("from datetime import datetime, date, time")
+        writeline("from uuid import UUID")
+        writeline()
+        writeline(f"class {py_name(model.db_name.title())}{py_name(schema.name.title())}Tables:")
+
+        tables = [x for x in model.get_tables() if x.schema_id == schema.schema_id]
+        for table in tables:
+            writeline(f"    class {py_name(table.name)}:")
+            writeline(f"        def __str__(self): return '{table.name}'")
+            writeline(f"        def __repr__(self): return '{repr(table)}'")
+            writeline()
+            
+            for col in table.columns:
+                writeline(f"        {py_name(col.name)} = '{col.name}'")
+            writeline()
+
     def script_schema_routines(self, schema: Schema, fs: TextIOWrapper):
         model = self.db.model
-        result = StringIO()
 
         def writeline(s: str = None):
             fs.write(f"{s or ''}\n")
@@ -67,7 +91,6 @@ class PyScripter:
         return "object"
 
 
-
 if __name__ == "__main__":
     import myconfig
     cnstr = myconfig.connectionString
@@ -75,7 +98,9 @@ if __name__ == "__main__":
     db = Database(cnstr=cnstr)
     schema = db.model.schemas.get_by_name("[dbo]")
     scripter = PyScripter(db)
-    with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated.py', mode='w') as fs:
-        s = scripter.script_schema_routines(schema, fs)
-    print(s)
+    # with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\routines.py', mode='w') as fs:
+    #     s = scripter.script_schema_routines(schema, fs)
+
+    with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\tables.py', mode='w') as fs:
+        scripter.script_schema_tables(schema, fs)
     print('#done')
