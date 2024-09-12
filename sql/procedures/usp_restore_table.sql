@@ -1,6 +1,9 @@
-CREATE OR ALTER PROCEDURE mrtest.usp_restore_table
+CREATE OR ALTER PROCEDURE [mrtest].[usp_restore_table]
+--declare
     @schema_name NVARCHAR(256)
     ,@table_name NVARCHAR(256)
+
+--select @schema_name = 'dbo', @table_name = 'Dim_City';
 AS
 
 DECLARE @hidden_name NVARCHAR(256) = @table_name + '_hidden_mrtest';
@@ -21,6 +24,7 @@ EXECUTE ('DROP TABLE ' + @full_table_name);
 
 -- restore original table
 EXECUTE sp_rename @objname = @full_hidden_name, @newname = @table_name, @objtype = 'OBJECT';
-GO
+
+go
 
 --EXECUTE mrtest.usp_restore_table @schema_name = 'examples', @table_name = 'Order Details';

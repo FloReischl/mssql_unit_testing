@@ -15,9 +15,9 @@ INSERT INTO @hidden_tables (
     SELECT
         object_id
         ,OBJECT_SCHEMA_NAME(object_id)
-        ,SUBSTRING(name, 1, LEN(name) - 16)
+        ,SUBSTRING(name, 1, LEN(name) - 14)
     FROM sys.tables
-    WHERE name like '%_hidden_cb751972'
+    WHERE name like '%_hidden_mrtest'
     ;
 
 DECLARE @object_id INT;

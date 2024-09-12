@@ -3,8 +3,8 @@ CREATE OR ALTER PROCEDURE mrtest.usp_mock_table
     ,@table_name NVARCHAR(256)
 AS
 
-DECLARE @hidden_name NVARCHAR(256) = @table_name + '_hidden_cb751972';
-DECLARE @mock_name NVARCHAR(256) = @table_name + '_mock_cb751972';
+DECLARE @hidden_name NVARCHAR(256) = @table_name + '_hidden_mrtest';
+DECLARE @mock_name NVARCHAR(256) = @table_name + '_mock_mrtest';
 
 DECLARE @full_table_name NVARCHAR(512)  = QUOTENAME(@schema_name) + '.' + QUOTENAME(@table_name);
 DECLARE @full_hidden_name NVARCHAR(512) = QUOTENAME(@schema_name) + '.' + QUOTENAME(@hidden_name);
@@ -37,9 +37,9 @@ EXECUTE sp_rename @objname = @full_table_name, @newname = @hidden_name, @objtype
 EXECUTE sp_rename @objname = @full_mock_name, @newname = @table_name, @objtype = 'OBJECT';
 
 GO
-EXECUTE mrtest.usp_mock_table
-    @schema_name = 'examples'
-    ,@table_name = 'Order Details';
+-- EXECUTE mrtest.usp_mock_table
+--     @schema_name = 'examples'
+--     ,@table_name = 'Order Details';
 
 -- select * FROM sys.tables WHERE object_id = NULL
 -- SELECT * FROM examples.[Order Details]

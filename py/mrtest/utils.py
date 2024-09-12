@@ -6,6 +6,9 @@ alpha_chars = {
 def quote(name: str):
     return "[" + name.replace("]", "]]") + "]"
 
+def sql_name(name: str)
+    return py_name(name)
+
 def py_name(name: str):
     name = name.replace('[', '').replace("@", "")
     

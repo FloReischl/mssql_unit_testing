@@ -5,7 +5,7 @@ from .utils import quote
 from .schema import Schema
 
 class Column(DbItem):
-    def __init__(self, row: Row):
+    def __init__(self, row: Row, systypes: DbItems[SysType]):
         self.object_id = row.object_id
         self.name = row.name
         self.column_id = row.column_id
@@ -18,7 +18,9 @@ class Column(DbItem):
         self.is_identity: bool = row.is_identity == 1
         self.is_computed: bool = row.is_computed == 1
         self.is_rowguidcol: bool = row.is_rowguidcol == 1
+        self.is_pk_column: bool = row.is_pk_column == 1
 
+        self.sys_type = systypes.get_by_id(self.user_type_id)
         self.unique_name = quote(self.name)
         self.id = self.column_id
         super().__init__()

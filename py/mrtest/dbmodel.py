@@ -37,7 +37,7 @@ class DbModel:
     def get_tables(self) -> DbItems[Table]:
         all_cols = list[Column]()
         for row in self.dbx.get_rows(SELECT_SYS_COLUMNS):
-            all_cols.append(Column(row))
+            all_cols.append(Column(row, self.systypes))
         
         result = DbItems[Table]()
         for row in self.dbx.get_rows(SELECT_SYS_TABLES):

@@ -39,21 +39,32 @@ from sys.tables;
 """
 
 SELECT_SYS_COLUMNS = """
+with pk_cols as (
+    select 
+        pk.object_id, ixc.column_id
+    from sys.indexes pk
+        join sys.index_columns ixc on pk.object_id = ixc.object_id and pk.index_id = ixc.index_id
+    where pk.is_primary_key = 1
+)
 select
-    object_id
-    ,name
-    ,column_id
-    ,system_type_id
-    ,user_type_id
-    ,max_length
-    ,precision
-    ,scale
-    ,is_nullable
-    ,is_identity
-    ,is_computed
-    ,is_rowguidcol
+    c.object_id
+    ,c.name
+    ,c.column_id
+    ,c.system_type_id
+    ,c.user_type_id
+    ,c.max_length
+    ,c.precision
+    ,c.scale
+    ,c.is_nullable
+    ,c.is_identity
+    ,c.is_computed
+    ,c.is_rowguidcol
+    ,iif(pk_cols.column_id is null, 0, 1) as is_pk_column
     --,*
-from sys.columns;
+from sys.columns c
+    join sys.objects o on c.object_id = o.object_id and o.is_ms_shipped = 0
+    left join pk_cols on o.object_id = pk_cols.object_id and c.column_id = pk_cols.column_id
+order by o.name, c.column_id
 """
 
 

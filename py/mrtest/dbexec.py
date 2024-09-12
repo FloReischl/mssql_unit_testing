@@ -1,4 +1,4 @@
-from pyodbc import Connection, Row, Cursor, connect as odbc_connect
+from pyodbc import Connection, Row, Cursor, connect as odbc_connect, ProgrammingError
 from typing import Any
 import pandas as pd
 from pandas import DataFrame
@@ -28,19 +28,32 @@ class DbExec:
     def get_all_df(self, sql: str, params: Any = []) -> list[DataFrame]:
         result = list[DataFrame]()
         with self.cn.execute(sql, params) as cur:
-            result.append(self._df_from_cursor(cur))
+            self._df_from_cursor(cur, result)
+            # result.append(self._df_from_cursor(cur))
             while cur.nextset():
-                result.append(self._df_from_cursor(cur))
+                # result.append(self._df_from_cursor(cur))
+                self._df_from_cursor(cur, result)
         return result
+
+    def exec_non_query(self, sql: str, params: Any = []):
+        with self.cn.execute(sql, params) as cur:
+            pass
 
     def get_result(self, sql: str, params: Any = []) -> Result:
         all_df = self.get_all_df(sql, params=params)
         return Result(all_df=all_df)
 
-    def _df_from_cursor(self, cur: Cursor) -> DataFrame:
-        rows = cur.fetchall()
-        cols = list([x[0] for x in cur.description])
-        return pd.DataFrame.from_records(rows, columns=cols)
+    def _df_from_cursor(self, cur: Cursor, target: list[DataFrame] = None) -> DataFrame:
+        try:
+            rows = cur.fetchall()
+            cols = list([x[0] for x in cur.description])
+            df = pd.DataFrame.from_records(rows, columns=cols)
+            if target != None: target.append(df)
+            return df
+        except ProgrammingError as ex:
+            if (len(ex.args) >= 1 and ex.args[0] == 'No results.  Previous SQL was not a query.'):
+                return None
+            raise
 
 if __name__ == '__main__':
     import myconfig
