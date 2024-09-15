@@ -1,11 +1,10 @@
 from io import TextIOWrapper
-from .schema import Schema
-from .utils import py_name
-from .dbscripter import DbScripter
+from mrtest import Schema
+from mrtest import py_name, quotename
+from dbscripter import DbScripter
 from typing import Any
-from .procedure import ProcParameter
-from .systype import TypeCode, SysType
-from .dbmodel import DbModel
+from mrtest import TypeCode, SysType
+from mrtest import DbModel
 
 class PyScripter:
     def __init__(self, model: DbModel) -> None:
@@ -22,30 +21,31 @@ class PyScripter:
         def writeline(s: str = None): fs.write(f"{s or ''}\n")
         def write(s: str = None): fs.write(f"{s or ''}")
 
-        writeline("from mrtest import DbExec, Result")
-        writeline("import pyodbc")
+        writeline("from mrtest import DbCmd")
+        writeline("from pyodbc import Connection, BinaryNull")
         writeline("from datetime import datetime, date, time")
         writeline("from uuid import UUID")
         writeline()
         writeline(f"class {class_name}:")
-        # writeline(f"class {py_name(model.db_name.title())}{py_name(schema.name.title())}Tables:")
 
         dbs = DbScripter(model=model)
         tables = [x for x in model.get_tables() if x.schema_id == schema.schema_id]
         for table in tables:
+            s_name = table.schema.name
+            t_name = py_name(table.name)
             writeline(f"    class {py_name(table.name)}:")
 
+            writeline("        # table")
+            writeline(f"        {t_name}_TableName = '{table.name}'")
+            writeline(f"        {t_name}_SchemaName = '{s_name}'")
+            writeline(f"        {t_name}_QualifiedName = '{quotename(s_name)}.{quotename(t_name)}'")
             writeline("        # columns")            
             for col in table.columns:
                 writeline(f"        {py_name(col.name)} = '{col.name}'")
             writeline()
 
-            writeline("        def __init__(self, cn: (pyodbc.Connection | str)):")
-            writeline("            self.dbx = DbExec(cn)")
-            writeline()
-
-            writeline(f"        def __str__(self): return '{table.name}'")
-            writeline(f"        def __repr__(self): return '{repr(table)}'")
+            writeline("        def __init__(self, cnOrStr: (Connection | str)):")
+            writeline("            self.cnOrStr = cnOrStr")
             writeline()
 
             # crud
@@ -62,6 +62,7 @@ class PyScripter:
                 p_name = py_name(col.name)
                 type_def = self._py_type_def(col.sys_type)
                 if col.is_pk_column:
+                    p_update += f", {p_name}: {type_def}"
                     p_delete += f", {p_name}: {type_def}"
                     p_delete_names.append(p_name)
                     if not col.is_identity:
@@ -69,24 +70,27 @@ class PyScripter:
                         p_insert_names.append(p_name)
                 else:
                     if col.is_nullable:
-                        p_insert_nullable += f", {p_name}: {type_def} = None"
+                        nv = 'None' if not col.sys_type.is_binary() else 'BinaryNull'
+                        p_insert_nullable += f", {p_name}: {type_def} = {nv}"
                         p_insert_names.append(p_name)
-                        p_update_nullable += f", {p_name}: {type_def} = None"
+                        p_update_nullable += f", {p_name}: {type_def} = {nv}"
                     elif not col.is_identity:
                         p_insert += f", {p_name}: {type_def}"
                         p_insert_names.append(p_name)
-                p_update += f", {p_name}: {type_def}"
+                        p_update += f", {p_name}: {type_def}"
                 p_update_names.append(p_name)
 
-            writeline(f"        def insert({p_insert}{p_insert_nullable}):")
-            writeline(f"            sql = \"\"\"{dbs.get_table_insert_sql(table)}\"\"\"")
-            writeline(f"            return self.dbx.get_result(sql, [ {", ".join(p_insert_names)} ])")
+            writeline(f"        def insert({p_insert}{p_insert_nullable}) -> DbCmd:")
+            writeline(f"            sql = \"\"\"\n{dbs.get_table_insert_sql(table)}\n\"\"\"")
+            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_insert_names)} ])")
             writeline()
-            writeline(f"        def update({p_update}{p_update_nullable}):")
-            
-
-            # write("        def update(self")
-            
+            writeline(f"        def update({p_update}{p_update_nullable}) -> DbCmd:")
+            writeline(f"            sql = \"\"\"\n{dbs.get_table_update_sql(table)}\n\"\"\"")
+            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_update_names)} ])")
+            writeline()
+            writeline(f"        def delete({p_delete}) -> DbCmd:")
+            writeline(f"            sql = \"\"\"\n{dbs.get_table_delete_sql(table)}\n\"\"\"")
+            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_delete_names)} ])")
             writeline()
 
     def script_schema_routines(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):
@@ -98,15 +102,18 @@ class PyScripter:
         def write(s: str = None):
             fs.write(f"{s or ''}")
         
-        writeline("from mrtest import DbExec, Result")
-        writeline("import pyodbc")
+        writeline("from mrtest import DbCmd")
+        writeline("from pyodbc import Connection")
         writeline("from typing import Any")
         writeline("from datetime import datetime, date, time")
         writeline("from uuid import UUID")
         writeline()
         writeline(f"class {class_name}:")
-        writeline("    def __init__(self, cn: (pyodbc.Connection | str)):")
-        writeline("        self.dbx = DbExec(cn)")
+        writeline("    def __init__(self, cnOrStr: (Connection | str)):")
+        writeline("        self.cnOrStr = cnOrStr")
+        writeline()
+        writeline("    def custom_sql(self, sql: str, params: Any = None):")
+        writeline("        return DbCmd(self.cnOrStr, sql, params)")
         writeline()
 
         procs = [x for x in model.get_procedures() if x.schema_id == schema.schema_id]
@@ -121,11 +128,11 @@ class PyScripter:
                 pnames.append(pname)
                 write(", ")
                 write(f"{pname}: {self._py_type_def(param.sys_type)}")
-            writeline(") -> Result:")
+            writeline(") -> DbCmd:")
             writeline("        sql = \"\"\"")
             writeline(dbs.get_exec_proc_sql(proc).strip())
             writeline("\"\"\"")
-            writeline(f"        return self.dbx.get_result(sql, [ {", ".join(pnames)} ])")
+            writeline(f"        return DbCmd(self.cnOrStr, sql, [ {", ".join(pnames)} ])")
             writeline()
 
     def _py_type_def(self, st: SysType):

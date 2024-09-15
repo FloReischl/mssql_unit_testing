@@ -48,6 +48,7 @@ with pk_cols as (
 )
 select
     c.object_id
+	,o.name table_name
     ,c.name
     ,c.column_id
     ,c.system_type_id
@@ -62,9 +63,9 @@ select
     ,iif(pk_cols.column_id is null, 0, 1) as is_pk_column
     --,*
 from sys.columns c
-    join sys.objects o on c.object_id = o.object_id and o.is_ms_shipped = 0
-    left join pk_cols on o.object_id = pk_cols.object_id and c.column_id = pk_cols.column_id
-order by o.name, c.column_id
+    join sys.objects o on c.object_id = o.object_id and o.is_ms_shipped = 0 and o.type = 'U'
+    left join pk_cols on o.object_id = pk_cols.object_id and c.object_id = pk_cols.object_id and c.column_id = pk_cols.column_id
+order by o.schema_id, o.name, c.column_id
 """
 
 

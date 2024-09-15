@@ -1,6 +1,6 @@
 import pytest
 from pyodbc import Connection
-from mrtest import DbExec, DbMock
+from mrtest import DbMock, DbCmd
 from generated.sandbox_routines import SandboxDboRoutines
 
 class Test_Dim_City:
@@ -12,8 +12,8 @@ class Test_Dim_City:
     #         assert len(rows) == 1
 
     # # raw dataframe
-    # def test_get_city_df(self, sandbox_dbx: DbExec):
-    #     df = sandbox_dbx.get_df('execute usp_get_city @city_id = ?', [ 24379 ])
+    # def test_get_city_df(self, sandbox_connection):
+    #     df = DbCmd(sandbox_connection, 'execute usp_get_city @city_id = ?', [ 24379 ]).exec_df()
     #     assert all(df.City == 'München')
     #     assert len(df) == 1
 

@@ -33,7 +33,7 @@ BEGIN
     FROM @hidden_tables
     ;
 
-    EXECUTE mock.usp_mock_table @schema_name = @schema_name, @table_name = @table_name;
+    EXECUTE mrtest.usp_mock_table @schema_name = @schema_name, @table_name = @table_name;
 
     DELETE FROM @hidden_tables WHERE object_id = @object_id;
 END;

@@ -1,5 +1,6 @@
 from collections.abc import Iterator, Iterable
 from typing import TypeVar, Generic, MutableSequence
+from pyodbc import Row
 
 
 class DbItem:

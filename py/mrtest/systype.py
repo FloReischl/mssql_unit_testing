@@ -3,6 +3,9 @@ from pyodbc import Row
 from enum import Enum
 
 class TypeCode(Enum):
+    """
+    Enum of system data types
+    """
     IMAGE = 34
     TEXT = 35
     UNIQUEIDENTIFIER = 36
@@ -41,7 +44,13 @@ class TypeCode(Enum):
     UNKNOWN = -1
 
 class SysType(DbItem):
+    """
+    Represents a sys.type. Access via (DbModel.sys_types).
+    """
     def __init__(self, info) -> None:
+        """
+        Internal constructor. Access via (DbModel.sys_types).
+        """
         super().__init__()
         self.name: str = info['name']
         self.system_type_id: int = info['system_type_id']
@@ -63,33 +72,41 @@ class SysType(DbItem):
         self.unique_name = self.name
 
     def get_base_type(self):
+        """gets the base type of the sys.type; if the current type is a user type. otherwise it returns self."""
         return self.base_type or self
-    
-    def post_init(self, all: DbItems[DbItem]):
-        # self.base_type = self if not self.is_user_defined or self.is_table_type else all.get_by_id(self.system_type_id)
-        self.base_type = all.try_get_by_id(self.system_type_id) or self
-        self.base_code = self.base_type.code
 
     def is_legacy(self) -> bool:
+        "gets if the type is a legacy type (e.g. datetime, text, image, ntext)"
         return self.code in [ TypeCode.DATETIME, TypeCode.IMAGE, TypeCode.TEXT, TypeCode.NTEXT ]
 
     def is_string(self) -> bool:
+        "gets if the type is a string type."
         return self.base_code in [ TypeCode.CHAR, TypeCode.NCHAR, TypeCode.VARCHAR, TypeCode.NVARCHAR, TypeCode.TEXT, TypeCode.NTEXT ]
     
     def is_binary(self) -> bool:
+        "gets if the type is a binary type"
         return self.base_code in [ TypeCode.BINARY, TypeCode.VARBINARY, TypeCode.IMAGE ]
 
-    def is_number(self):
+    def is_numeric(self):
+        "gets if the type is numeric."
         return self.is_natural_number() or self.is_fixed_number() or self.is_floating_number()
 
     def is_natural_number(self) -> bool:
+        "gets if the type represents a natural (full) number."
         return self.base_code in [ TypeCode.BIT, TypeCode.TINYINT, TypeCode.SMALLINT, TypeCode.INT, TypeCode.BIGINT ]
     
     def is_fixed_number(self) -> bool:
+        "gets if the type is a fixed scale and precision number"
         return self.base_code in [ TypeCode.DECIMAL, TypeCode.NUMERIC, TypeCode.MONEY, TypeCode.SMALLMONEY ]
     
     def is_floating_number(self) -> bool:
+        "gets if the type is a floating point number."
         return self.base_code in [ TypeCode.REAL, TypeCode.FLOAT ]
     
     def is_date(self) -> bool:
+        "gets if the type is a date or time."
         return self.base_code in [ TypeCode.DATE, TypeCode.DATETIME, TypeCode.DATETIME2, TypeCode.DATETIMEOFFSET, TypeCode.TIME ]
+    
+    def _post_init(self, all: DbItems[DbItem]):
+        self.base_type = all.try_get_by_id(self.system_type_id) or self
+        self.base_code = self.base_type.code

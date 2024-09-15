@@ -17,7 +17,7 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = OBJECT_ID(@full_table_
 
 -- check recovery table exists
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = OBJECT_ID(@full_hidden_name))
-    THROW 50000, 'Hidden recovery table already exists. Please verify and fix the database schema.', 1;
+    THROW 50000, 'Hidden recovery table not found. Please verify and fix the database schema.', 1;
 
 -- drop mock table
 EXECUTE ('DROP TABLE ' + @full_table_name);

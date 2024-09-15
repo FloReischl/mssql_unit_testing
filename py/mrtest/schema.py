@@ -3,7 +3,13 @@ from pyodbc import Row
 from .utils import quote
 
 class Schema(DbItem):
+    """
+    Represents a database schema. Use (DbModel.schemas) to access schemas.
+    """
     def __init__(self, info: Row) -> None:
+        """
+        Internal constructor. Use (DbModel.schemas) to access schemas.
+        """
         super().__init__()
         self.name: str = info.name
         self.schema_id: int = info.schema_id

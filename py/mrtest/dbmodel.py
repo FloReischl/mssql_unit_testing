@@ -11,11 +11,24 @@ from .systype import SysType
 from .procedure import Procedure, ProcParameter
 from .table import Table, Column
 from typing import Any
-from .dbexec import DbExec
+from .dbcmd import DbCmd
+from pyodbc import Connection
 
 class DbModel:
-    def __init__(self, dbx: DbExec) -> None:
-        self.dbx = dbx
+    """
+    Represents the database model
+
+    Attributes
+    ----------
+    db_name         : str
+                      Name of the database.
+    systypes        : list[Systype]
+                      List of all discovered data types (sys.types).
+    schemas         : list[Schema]
+                      List of all database schemas holding user objects.
+    """
+    def __init__(self, cn: Connection) -> None:
+        self.cn = cn
         self.db_name: str = None
         self._load_db_name()
         self.systypes = DbItems[SysType]()
@@ -24,39 +37,45 @@ class DbModel:
         self._load_schemas()
 
     def get_procedures(self) -> DbItems[Procedure]:
+        """
+        Gets the list of all stored procedures.
+        """
         params = list[ProcParameter]()
-        for row in self.dbx.get_rows(SELECT_SYS_PARAMETERS):
+        for row in DbCmd(self.cn, SELECT_SYS_PARAMETERS).exec_rows():
             params.append(ProcParameter(row, self.systypes))
 
         result = DbItems[Procedure]()
-        for row in self.dbx.get_rows(SELECT_SYS_PROCEDURES):
+        for row in DbCmd(self.cn, SELECT_SYS_PROCEDURES).exec_rows():
             pp = DbItems([x for x in params if x.object_id == row.object_id])
             result.append(Procedure(row, self.schemas, pp))
         return result
     
     def get_tables(self) -> DbItems[Table]:
+        """
+        Gets a list of all tables.
+        """
         all_cols = list[Column]()
-        for row in self.dbx.get_rows(SELECT_SYS_COLUMNS):
+        for row in DbCmd(self.cn, SELECT_SYS_COLUMNS).exec_rows():
             all_cols.append(Column(row, self.systypes))
         
         result = DbItems[Table]()
-        for row in self.dbx.get_rows(SELECT_SYS_TABLES):
+        for row in DbCmd(self.cn, SELECT_SYS_TABLES).exec_rows():
             object_id = row.object_id
             cols = DbItems[Column]([x for x in all_cols if x.object_id == object_id])
             result.append(Table(row, self.schemas, cols))
         return result
 
     def _load_db_name(self):
-        row = self.dbx.get_rows(SELECT_DB_NAME)[0]
+        row = DbCmd(self.cn, SELECT_DB_NAME).exec_rows()[0]
         self.db_name = row.name
 
     def _load_systypes(self):
-        for row in self.dbx.get_df(SELECT_SYS_TYPES).iterrows():
-            self.systypes.append(SysType(row[1]))
+        for i,row in DbCmd(self.cn, SELECT_SYS_TYPES).exec_df().iterrows():
+            self.systypes.append(SysType(row))
         
         for st in self.systypes:
-            st.post_init(self.systypes)
+            st._post_init(self.systypes)
 
     def _load_schemas(self):
-        for row in self.dbx.get_rows(SELECT_SYS_SCHEMAS):
+        for row in DbCmd(self.cn, SELECT_SYS_SCHEMAS).exec_rows():
             self.schemas.append(Schema(row))
