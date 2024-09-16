@@ -2,13 +2,14 @@ from mrtest import DbCmd
 from pyodbc import Connection, BinaryNull
 from datetime import datetime, date, time
 from uuid import UUID
+from pandas import DataFrame
 
 class TstDbExamplesTables:
     class Categories:
         # table
-        Categories_TableName = 'Categories'
-        Categories_SchemaName = 'examples'
-        Categories_QualifiedName = '[examples].[Categories]'
+        TableName = 'Categories'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Categories]'
         # columns
         CategoryID = 'CategoryID'
         CategoryName = 'CategoryName'
@@ -18,7 +19,7 @@ class TstDbExamplesTables:
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CategoryName: str, Description: str = None, Picture: bytes = BinaryNull) -> DbCmd:
+        def insert(self, CategoryName: str, Description: str = None, Picture: bytes = BinaryNull) -> DataFrame:
             sql = """
 DECLARE
     @CategoryName nvarchar(30) = ?
@@ -39,9 +40,9 @@ VALUES (
 
 SELECT SCOPE_IDENTITY() [scope_identity];
 """
-            return DbCmd(self.cnOrStr, sql, [ CategoryName, Description, Picture ])
+            return DbCmd(self.cnOrStr, sql, [ CategoryName, Description, Picture ]).exec_df()
 
-        def update(self, CategoryID: int, CategoryName: str, Description: str = None, Picture: bytes = BinaryNull) -> DbCmd:
+        def update(self, CategoryID: int, CategoryName: str, Description: str = None, Picture: bytes = BinaryNull) -> DataFrame:
             sql = """
 DECLARE
     @CategoryID int = ?
@@ -60,9 +61,9 @@ UPDATE [examples].[Categories] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CategoryID, CategoryName, Description, Picture ])
+            return DbCmd(self.cnOrStr, sql, [ CategoryID, CategoryName, Description, Picture ]).exec_df()
 
-        def delete(self, CategoryID: int) -> DbCmd:
+        def delete(self, CategoryID: int) -> DataFrame:
             sql = """
 DECLARE
     @CategoryID int = ?
@@ -75,13 +76,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CategoryID ])
+            return DbCmd(self.cnOrStr, sql, [ CategoryID ]).exec_df()
 
     class CustomerCustomerDemo:
         # table
-        CustomerCustomerDemo_TableName = 'CustomerCustomerDemo'
-        CustomerCustomerDemo_SchemaName = 'examples'
-        CustomerCustomerDemo_QualifiedName = '[examples].[CustomerCustomerDemo]'
+        TableName = 'CustomerCustomerDemo'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[CustomerCustomerDemo]'
         # columns
         CustomerID = 'CustomerID'
         CustomerTypeID = 'CustomerTypeID'
@@ -89,7 +90,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CustomerID: str, CustomerTypeID: str) -> DbCmd:
+        def insert(self, CustomerID: str, CustomerTypeID: str) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -105,9 +106,9 @@ VALUES (
     ,@CustomerTypeID
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID, CustomerTypeID ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID, CustomerTypeID ]).exec_df()
 
-        def update(self, CustomerID: str, CustomerTypeID: str) -> DbCmd:
+        def update(self, CustomerID: str, CustomerTypeID: str) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -122,9 +123,9 @@ UPDATE [examples].[CustomerCustomerDemo] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID, CustomerTypeID ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID, CustomerTypeID ]).exec_df()
 
-        def delete(self, CustomerID: str, CustomerTypeID: str) -> DbCmd:
+        def delete(self, CustomerID: str, CustomerTypeID: str) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -139,13 +140,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID, CustomerTypeID ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID, CustomerTypeID ]).exec_df()
 
     class CustomerDemographics:
         # table
-        CustomerDemographics_TableName = 'CustomerDemographics'
-        CustomerDemographics_SchemaName = 'examples'
-        CustomerDemographics_QualifiedName = '[examples].[CustomerDemographics]'
+        TableName = 'CustomerDemographics'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[CustomerDemographics]'
         # columns
         CustomerTypeID = 'CustomerTypeID'
         CustomerDesc = 'CustomerDesc'
@@ -153,7 +154,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CustomerTypeID: str, CustomerDesc: str = None) -> DbCmd:
+        def insert(self, CustomerTypeID: str, CustomerDesc: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CustomerTypeID nchar(20) = ?
@@ -169,9 +170,9 @@ VALUES (
     ,@CustomerDesc
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerTypeID, CustomerDesc ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerTypeID, CustomerDesc ]).exec_df()
 
-        def update(self, CustomerTypeID: str, CustomerDesc: str = None) -> DbCmd:
+        def update(self, CustomerTypeID: str, CustomerDesc: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CustomerTypeID nchar(20) = ?
@@ -186,9 +187,9 @@ UPDATE [examples].[CustomerDemographics] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerTypeID, CustomerDesc ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerTypeID, CustomerDesc ]).exec_df()
 
-        def delete(self, CustomerTypeID: str) -> DbCmd:
+        def delete(self, CustomerTypeID: str) -> DataFrame:
             sql = """
 DECLARE
     @CustomerTypeID nchar(20) = ?
@@ -201,13 +202,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerTypeID ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerTypeID ]).exec_df()
 
     class Customers:
         # table
-        Customers_TableName = 'Customers'
-        Customers_SchemaName = 'examples'
-        Customers_QualifiedName = '[examples].[Customers]'
+        TableName = 'Customers'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Customers]'
         # columns
         CustomerID = 'CustomerID'
         CompanyName = 'CompanyName'
@@ -224,7 +225,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CustomerID: str, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None) -> DbCmd:
+        def insert(self, CustomerID: str, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -267,9 +268,9 @@ VALUES (
     ,@Fax
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ]).exec_df()
 
-        def update(self, CustomerID: str, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None) -> DbCmd:
+        def update(self, CustomerID: str, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -302,9 +303,9 @@ UPDATE [examples].[Customers] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax ]).exec_df()
 
-        def delete(self, CustomerID: str) -> DbCmd:
+        def delete(self, CustomerID: str) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -317,13 +318,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID ]).exec_df()
 
     class Employees:
         # table
-        Employees_TableName = 'Employees'
-        Employees_SchemaName = 'examples'
-        Employees_QualifiedName = '[examples].[Employees]'
+        TableName = 'Employees'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Employees]'
         # columns
         EmployeeID = 'EmployeeID'
         LastName = 'LastName'
@@ -347,7 +348,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, LastName: str, FirstName: str, Title: str = None, TitleOfCourtesy: str = None, BirthDate: datetime = None, HireDate: datetime = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, HomePhone: str = None, Extension: str = None, Photo: bytes = BinaryNull, Notes: str = None, ReportsTo: int = None, PhotoPath: str = None) -> DbCmd:
+        def insert(self, LastName: str, FirstName: str, Title: str = None, TitleOfCourtesy: str = None, BirthDate: datetime = None, HireDate: datetime = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, HomePhone: str = None, Extension: str = None, Photo: bytes = BinaryNull, Notes: str = None, ReportsTo: int = None, PhotoPath: str = None) -> DataFrame:
             sql = """
 DECLARE
     @LastName nvarchar(40) = ?
@@ -410,9 +411,9 @@ VALUES (
 
 SELECT SCOPE_IDENTITY() [scope_identity];
 """
-            return DbCmd(self.cnOrStr, sql, [ LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country, HomePhone, Extension, Photo, Notes, ReportsTo, PhotoPath ])
+            return DbCmd(self.cnOrStr, sql, [ LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country, HomePhone, Extension, Photo, Notes, ReportsTo, PhotoPath ]).exec_df()
 
-        def update(self, EmployeeID: int, LastName: str, FirstName: str, Title: str = None, TitleOfCourtesy: str = None, BirthDate: datetime = None, HireDate: datetime = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, HomePhone: str = None, Extension: str = None, Photo: bytes = BinaryNull, Notes: str = None, ReportsTo: int = None, PhotoPath: str = None) -> DbCmd:
+        def update(self, EmployeeID: int, LastName: str, FirstName: str, Title: str = None, TitleOfCourtesy: str = None, BirthDate: datetime = None, HireDate: datetime = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, HomePhone: str = None, Extension: str = None, Photo: bytes = BinaryNull, Notes: str = None, ReportsTo: int = None, PhotoPath: str = None) -> DataFrame:
             sql = """
 DECLARE
     @EmployeeID int = ?
@@ -459,9 +460,9 @@ UPDATE [examples].[Employees] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ EmployeeID, LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country, HomePhone, Extension, Photo, Notes, ReportsTo, PhotoPath ])
+            return DbCmd(self.cnOrStr, sql, [ EmployeeID, LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country, HomePhone, Extension, Photo, Notes, ReportsTo, PhotoPath ]).exec_df()
 
-        def delete(self, EmployeeID: int) -> DbCmd:
+        def delete(self, EmployeeID: int) -> DataFrame:
             sql = """
 DECLARE
     @EmployeeID int = ?
@@ -474,13 +475,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ EmployeeID ])
+            return DbCmd(self.cnOrStr, sql, [ EmployeeID ]).exec_df()
 
     class EmployeeTerritories:
         # table
-        EmployeeTerritories_TableName = 'EmployeeTerritories'
-        EmployeeTerritories_SchemaName = 'examples'
-        EmployeeTerritories_QualifiedName = '[examples].[EmployeeTerritories]'
+        TableName = 'EmployeeTerritories'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[EmployeeTerritories]'
         # columns
         EmployeeID = 'EmployeeID'
         TerritoryID = 'TerritoryID'
@@ -488,7 +489,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, EmployeeID: int, TerritoryID: str) -> DbCmd:
+        def insert(self, EmployeeID: int, TerritoryID: str) -> DataFrame:
             sql = """
 DECLARE
     @EmployeeID int = ?
@@ -504,9 +505,9 @@ VALUES (
     ,@TerritoryID
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ EmployeeID, TerritoryID ])
+            return DbCmd(self.cnOrStr, sql, [ EmployeeID, TerritoryID ]).exec_df()
 
-        def update(self, EmployeeID: int, TerritoryID: str) -> DbCmd:
+        def update(self, EmployeeID: int, TerritoryID: str) -> DataFrame:
             sql = """
 DECLARE
     @EmployeeID int = ?
@@ -521,9 +522,9 @@ UPDATE [examples].[EmployeeTerritories] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ EmployeeID, TerritoryID ])
+            return DbCmd(self.cnOrStr, sql, [ EmployeeID, TerritoryID ]).exec_df()
 
-        def delete(self, EmployeeID: int, TerritoryID: str) -> DbCmd:
+        def delete(self, EmployeeID: int, TerritoryID: str) -> DataFrame:
             sql = """
 DECLARE
     @EmployeeID int = ?
@@ -538,13 +539,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ EmployeeID, TerritoryID ])
+            return DbCmd(self.cnOrStr, sql, [ EmployeeID, TerritoryID ]).exec_df()
 
     class Order_Details:
         # table
-        Order_Details_TableName = 'Order Details'
-        Order_Details_SchemaName = 'examples'
-        Order_Details_QualifiedName = '[examples].[Order_Details]'
+        TableName = 'Order Details'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Order_Details]'
         # columns
         OrderID = 'OrderID'
         ProductID = 'ProductID'
@@ -555,7 +556,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, OrderID: int, ProductID: int, UnitPrice: float, Quantity: int, Discount: float) -> DbCmd:
+        def insert(self, OrderID: int, ProductID: int, UnitPrice: float, Quantity: int, Discount: float) -> DataFrame:
             sql = """
 DECLARE
     @OrderID int = ?
@@ -580,9 +581,9 @@ VALUES (
     ,@Discount
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ OrderID, ProductID, UnitPrice, Quantity, Discount ])
+            return DbCmd(self.cnOrStr, sql, [ OrderID, ProductID, UnitPrice, Quantity, Discount ]).exec_df()
 
-        def update(self, OrderID: int, ProductID: int, UnitPrice: float, Quantity: int, Discount: float) -> DbCmd:
+        def update(self, OrderID: int, ProductID: int, UnitPrice: float, Quantity: int, Discount: float) -> DataFrame:
             sql = """
 DECLARE
     @OrderID int = ?
@@ -603,9 +604,9 @@ UPDATE [examples].[Order Details] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ OrderID, ProductID, UnitPrice, Quantity, Discount ])
+            return DbCmd(self.cnOrStr, sql, [ OrderID, ProductID, UnitPrice, Quantity, Discount ]).exec_df()
 
-        def delete(self, OrderID: int, ProductID: int) -> DbCmd:
+        def delete(self, OrderID: int, ProductID: int) -> DataFrame:
             sql = """
 DECLARE
     @OrderID int = ?
@@ -620,122 +621,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ OrderID, ProductID ])
-
-    class Products:
-        # table
-        Products_TableName = 'Products'
-        Products_SchemaName = 'examples'
-        Products_QualifiedName = '[examples].[Products]'
-        # columns
-        ProductID = 'ProductID'
-        ProductName = 'ProductName'
-        SupplierID = 'SupplierID'
-        CategoryID = 'CategoryID'
-        QuantityPerUnit = 'QuantityPerUnit'
-        UnitPrice = 'UnitPrice'
-        UnitsInStock = 'UnitsInStock'
-        UnitsOnOrder = 'UnitsOnOrder'
-        ReorderLevel = 'ReorderLevel'
-        Discontinued = 'Discontinued'
-
-        def __init__(self, cnOrStr: (Connection | str)):
-            self.cnOrStr = cnOrStr
-
-        def insert(self, ProductName: str, Discontinued: int, SupplierID: int = None, CategoryID: int = None, QuantityPerUnit: str = None, UnitPrice: float = None, UnitsInStock: int = None, UnitsOnOrder: int = None, ReorderLevel: int = None) -> DbCmd:
-            sql = """
-DECLARE
-    @ProductName nvarchar(80) = ?
-    ,@SupplierID int = ?
-    ,@CategoryID int = ?
-    ,@QuantityPerUnit nvarchar(40) = ?
-    ,@UnitPrice money(19, 4) = ?
-    ,@UnitsInStock smallint = ?
-    ,@UnitsOnOrder smallint = ?
-    ,@ReorderLevel smallint = ?
-    ,@Discontinued bit = ?
-;
-
-INSERT INTO [examples].[Products] (
-    [ProductName]
-    ,[SupplierID]
-    ,[CategoryID]
-    ,[QuantityPerUnit]
-    ,[UnitPrice]
-    ,[UnitsInStock]
-    ,[UnitsOnOrder]
-    ,[ReorderLevel]
-    ,[Discontinued]
-)
-VALUES (
-    @ProductName
-    ,@SupplierID
-    ,@CategoryID
-    ,@QuantityPerUnit
-    ,@UnitPrice
-    ,@UnitsInStock
-    ,@UnitsOnOrder
-    ,@ReorderLevel
-    ,@Discontinued
-);
-
-SELECT SCOPE_IDENTITY() [scope_identity];
-"""
-            return DbCmd(self.cnOrStr, sql, [ ProductName, SupplierID, CategoryID, QuantityPerUnit, UnitPrice, UnitsInStock, UnitsOnOrder, ReorderLevel, Discontinued ])
-
-        def update(self, ProductID: int, ProductName: str, Discontinued: int, SupplierID: int = None, CategoryID: int = None, QuantityPerUnit: str = None, UnitPrice: float = None, UnitsInStock: int = None, UnitsOnOrder: int = None, ReorderLevel: int = None) -> DbCmd:
-            sql = """
-DECLARE
-    @ProductID int = ?
-    ,@ProductName nvarchar(80) = ?
-    ,@SupplierID int = ?
-    ,@CategoryID int = ?
-    ,@QuantityPerUnit nvarchar(40) = ?
-    ,@UnitPrice money(19, 4) = ?
-    ,@UnitsInStock smallint = ?
-    ,@UnitsOnOrder smallint = ?
-    ,@ReorderLevel smallint = ?
-    ,@Discontinued bit = ?
-;
-
-UPDATE [examples].[Products] SET 
-    [ProductName] = @ProductName
-    ,[SupplierID] = @SupplierID
-    ,[CategoryID] = @CategoryID
-    ,[QuantityPerUnit] = @QuantityPerUnit
-    ,[UnitPrice] = @UnitPrice
-    ,[UnitsInStock] = @UnitsInStock
-    ,[UnitsOnOrder] = @UnitsOnOrder
-    ,[ReorderLevel] = @ReorderLevel
-    ,[Discontinued] = @Discontinued
- WHERE
-    [ProductID] = @ProductID
-;
-
-SELECT @@ROWCOUNT [rowcount];
-"""
-            return DbCmd(self.cnOrStr, sql, [ ProductID, ProductName, SupplierID, CategoryID, QuantityPerUnit, UnitPrice, UnitsInStock, UnitsOnOrder, ReorderLevel, Discontinued ])
-
-        def delete(self, ProductID: int) -> DbCmd:
-            sql = """
-DECLARE
-    @ProductID int = ?
-;
-
-DELETE [examples].[Products]
-WHERE
-    [ProductID] = @ProductID
-;
-
-SELECT @@ROWCOUNT [rowcount];
-"""
-            return DbCmd(self.cnOrStr, sql, [ ProductID ])
+            return DbCmd(self.cnOrStr, sql, [ OrderID, ProductID ]).exec_df()
 
     class Orders:
         # table
-        Orders_TableName = 'Orders'
-        Orders_SchemaName = 'examples'
-        Orders_QualifiedName = '[examples].[Orders]'
+        TableName = 'Orders'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Orders]'
         # columns
         OrderID = 'OrderID'
         CustomerID = 'CustomerID'
@@ -755,7 +647,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CustomerID: str = None, EmployeeID: int = None, OrderDate: datetime = None, RequiredDate: datetime = None, ShippedDate: datetime = None, ShipVia: int = None, Freight: float = None, ShipName: str = None, ShipAddress: str = None, ShipCity: str = None, ShipRegion: str = None, ShipPostalCode: str = None, ShipCountry: str = None) -> DbCmd:
+        def insert(self, CustomerID: str = None, EmployeeID: int = None, OrderDate: datetime = None, RequiredDate: datetime = None, ShippedDate: datetime = None, ShipVia: int = None, Freight: float = None, ShipName: str = None, ShipAddress: str = None, ShipCity: str = None, ShipRegion: str = None, ShipPostalCode: str = None, ShipCountry: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CustomerID nchar(10) = ?
@@ -806,9 +698,9 @@ VALUES (
 
 SELECT SCOPE_IDENTITY() [scope_identity];
 """
-            return DbCmd(self.cnOrStr, sql, [ CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry ])
+            return DbCmd(self.cnOrStr, sql, [ CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry ]).exec_df()
 
-        def update(self, OrderID: int, CustomerID: str = None, EmployeeID: int = None, OrderDate: datetime = None, RequiredDate: datetime = None, ShippedDate: datetime = None, ShipVia: int = None, Freight: float = None, ShipName: str = None, ShipAddress: str = None, ShipCity: str = None, ShipRegion: str = None, ShipPostalCode: str = None, ShipCountry: str = None) -> DbCmd:
+        def update(self, OrderID: int, CustomerID: str = None, EmployeeID: int = None, OrderDate: datetime = None, RequiredDate: datetime = None, ShippedDate: datetime = None, ShipVia: int = None, Freight: float = None, ShipName: str = None, ShipAddress: str = None, ShipCity: str = None, ShipRegion: str = None, ShipPostalCode: str = None, ShipCountry: str = None) -> DataFrame:
             sql = """
 DECLARE
     @OrderID int = ?
@@ -847,9 +739,9 @@ UPDATE [examples].[Orders] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ OrderID, CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry ])
+            return DbCmd(self.cnOrStr, sql, [ OrderID, CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry ]).exec_df()
 
-        def delete(self, OrderID: int) -> DbCmd:
+        def delete(self, OrderID: int) -> DataFrame:
             sql = """
 DECLARE
     @OrderID int = ?
@@ -862,13 +754,122 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ OrderID ])
+            return DbCmd(self.cnOrStr, sql, [ OrderID ]).exec_df()
+
+    class Products:
+        # table
+        TableName = 'Products'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Products]'
+        # columns
+        ProductID = 'ProductID'
+        ProductName = 'ProductName'
+        SupplierID = 'SupplierID'
+        CategoryID = 'CategoryID'
+        QuantityPerUnit = 'QuantityPerUnit'
+        UnitPrice = 'UnitPrice'
+        UnitsInStock = 'UnitsInStock'
+        UnitsOnOrder = 'UnitsOnOrder'
+        ReorderLevel = 'ReorderLevel'
+        Discontinued = 'Discontinued'
+
+        def __init__(self, cnOrStr: (Connection | str)):
+            self.cnOrStr = cnOrStr
+
+        def insert(self, ProductName: str, Discontinued: int, SupplierID: int = None, CategoryID: int = None, QuantityPerUnit: str = None, UnitPrice: float = None, UnitsInStock: int = None, UnitsOnOrder: int = None, ReorderLevel: int = None) -> DataFrame:
+            sql = """
+DECLARE
+    @ProductName nvarchar(80) = ?
+    ,@SupplierID int = ?
+    ,@CategoryID int = ?
+    ,@QuantityPerUnit nvarchar(40) = ?
+    ,@UnitPrice money(19, 4) = ?
+    ,@UnitsInStock smallint = ?
+    ,@UnitsOnOrder smallint = ?
+    ,@ReorderLevel smallint = ?
+    ,@Discontinued bit = ?
+;
+
+INSERT INTO [examples].[Products] (
+    [ProductName]
+    ,[SupplierID]
+    ,[CategoryID]
+    ,[QuantityPerUnit]
+    ,[UnitPrice]
+    ,[UnitsInStock]
+    ,[UnitsOnOrder]
+    ,[ReorderLevel]
+    ,[Discontinued]
+)
+VALUES (
+    @ProductName
+    ,@SupplierID
+    ,@CategoryID
+    ,@QuantityPerUnit
+    ,@UnitPrice
+    ,@UnitsInStock
+    ,@UnitsOnOrder
+    ,@ReorderLevel
+    ,@Discontinued
+);
+
+SELECT SCOPE_IDENTITY() [scope_identity];
+"""
+            return DbCmd(self.cnOrStr, sql, [ ProductName, SupplierID, CategoryID, QuantityPerUnit, UnitPrice, UnitsInStock, UnitsOnOrder, ReorderLevel, Discontinued ]).exec_df()
+
+        def update(self, ProductID: int, ProductName: str, Discontinued: int, SupplierID: int = None, CategoryID: int = None, QuantityPerUnit: str = None, UnitPrice: float = None, UnitsInStock: int = None, UnitsOnOrder: int = None, ReorderLevel: int = None) -> DataFrame:
+            sql = """
+DECLARE
+    @ProductID int = ?
+    ,@ProductName nvarchar(80) = ?
+    ,@SupplierID int = ?
+    ,@CategoryID int = ?
+    ,@QuantityPerUnit nvarchar(40) = ?
+    ,@UnitPrice money(19, 4) = ?
+    ,@UnitsInStock smallint = ?
+    ,@UnitsOnOrder smallint = ?
+    ,@ReorderLevel smallint = ?
+    ,@Discontinued bit = ?
+;
+
+UPDATE [examples].[Products] SET 
+    [ProductName] = @ProductName
+    ,[SupplierID] = @SupplierID
+    ,[CategoryID] = @CategoryID
+    ,[QuantityPerUnit] = @QuantityPerUnit
+    ,[UnitPrice] = @UnitPrice
+    ,[UnitsInStock] = @UnitsInStock
+    ,[UnitsOnOrder] = @UnitsOnOrder
+    ,[ReorderLevel] = @ReorderLevel
+    ,[Discontinued] = @Discontinued
+ WHERE
+    [ProductID] = @ProductID
+;
+
+SELECT @@ROWCOUNT [rowcount];
+"""
+            return DbCmd(self.cnOrStr, sql, [ ProductID, ProductName, SupplierID, CategoryID, QuantityPerUnit, UnitPrice, UnitsInStock, UnitsOnOrder, ReorderLevel, Discontinued ]).exec_df()
+
+        def delete(self, ProductID: int) -> DataFrame:
+            sql = """
+DECLARE
+    @ProductID int = ?
+;
+
+DELETE [examples].[Products]
+WHERE
+    [ProductID] = @ProductID
+;
+
+SELECT @@ROWCOUNT [rowcount];
+"""
+            return DbCmd(self.cnOrStr, sql, [ ProductID ]).exec_df()
 
     class Region:
         # table
-        Region_TableName = 'Region'
-        Region_SchemaName = 'examples'
-        Region_QualifiedName = '[examples].[Region]'
+        TableName = 'Region'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Region]'
         # columns
         RegionID = 'RegionID'
         RegionDescription = 'RegionDescription'
@@ -876,7 +877,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, RegionID: int, RegionDescription: str) -> DbCmd:
+        def insert(self, RegionID: int, RegionDescription: str) -> DataFrame:
             sql = """
 DECLARE
     @RegionID int = ?
@@ -892,9 +893,9 @@ VALUES (
     ,@RegionDescription
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ RegionID, RegionDescription ])
+            return DbCmd(self.cnOrStr, sql, [ RegionID, RegionDescription ]).exec_df()
 
-        def update(self, RegionID: int, RegionDescription: str) -> DbCmd:
+        def update(self, RegionID: int, RegionDescription: str) -> DataFrame:
             sql = """
 DECLARE
     @RegionID int = ?
@@ -909,9 +910,9 @@ UPDATE [examples].[Region] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ RegionID, RegionDescription ])
+            return DbCmd(self.cnOrStr, sql, [ RegionID, RegionDescription ]).exec_df()
 
-        def delete(self, RegionID: int) -> DbCmd:
+        def delete(self, RegionID: int) -> DataFrame:
             sql = """
 DECLARE
     @RegionID int = ?
@@ -924,13 +925,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ RegionID ])
+            return DbCmd(self.cnOrStr, sql, [ RegionID ]).exec_df()
 
     class Shippers:
         # table
-        Shippers_TableName = 'Shippers'
-        Shippers_SchemaName = 'examples'
-        Shippers_QualifiedName = '[examples].[Shippers]'
+        TableName = 'Shippers'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Shippers]'
         # columns
         ShipperID = 'ShipperID'
         CompanyName = 'CompanyName'
@@ -939,7 +940,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CompanyName: str, Phone: str = None) -> DbCmd:
+        def insert(self, CompanyName: str, Phone: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CompanyName nvarchar(80) = ?
@@ -957,9 +958,9 @@ VALUES (
 
 SELECT SCOPE_IDENTITY() [scope_identity];
 """
-            return DbCmd(self.cnOrStr, sql, [ CompanyName, Phone ])
+            return DbCmd(self.cnOrStr, sql, [ CompanyName, Phone ]).exec_df()
 
-        def update(self, ShipperID: int, CompanyName: str, Phone: str = None) -> DbCmd:
+        def update(self, ShipperID: int, CompanyName: str, Phone: str = None) -> DataFrame:
             sql = """
 DECLARE
     @ShipperID int = ?
@@ -976,9 +977,9 @@ UPDATE [examples].[Shippers] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ ShipperID, CompanyName, Phone ])
+            return DbCmd(self.cnOrStr, sql, [ ShipperID, CompanyName, Phone ]).exec_df()
 
-        def delete(self, ShipperID: int) -> DbCmd:
+        def delete(self, ShipperID: int) -> DataFrame:
             sql = """
 DECLARE
     @ShipperID int = ?
@@ -991,13 +992,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ ShipperID ])
+            return DbCmd(self.cnOrStr, sql, [ ShipperID ]).exec_df()
 
     class Suppliers:
         # table
-        Suppliers_TableName = 'Suppliers'
-        Suppliers_SchemaName = 'examples'
-        Suppliers_QualifiedName = '[examples].[Suppliers]'
+        TableName = 'Suppliers'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Suppliers]'
         # columns
         SupplierID = 'SupplierID'
         CompanyName = 'CompanyName'
@@ -1015,7 +1016,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None, HomePage: str = None) -> DbCmd:
+        def insert(self, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None, HomePage: str = None) -> DataFrame:
             sql = """
 DECLARE
     @CompanyName nvarchar(80) = ?
@@ -1060,9 +1061,9 @@ VALUES (
 
 SELECT SCOPE_IDENTITY() [scope_identity];
 """
-            return DbCmd(self.cnOrStr, sql, [ CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax, HomePage ])
+            return DbCmd(self.cnOrStr, sql, [ CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax, HomePage ]).exec_df()
 
-        def update(self, SupplierID: int, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None, HomePage: str = None) -> DbCmd:
+        def update(self, SupplierID: int, CompanyName: str, ContactName: str = None, ContactTitle: str = None, Address: str = None, City: str = None, Region: str = None, PostalCode: str = None, Country: str = None, Phone: str = None, Fax: str = None, HomePage: str = None) -> DataFrame:
             sql = """
 DECLARE
     @SupplierID int = ?
@@ -1097,9 +1098,9 @@ UPDATE [examples].[Suppliers] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ SupplierID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax, HomePage ])
+            return DbCmd(self.cnOrStr, sql, [ SupplierID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax, HomePage ]).exec_df()
 
-        def delete(self, SupplierID: int) -> DbCmd:
+        def delete(self, SupplierID: int) -> DataFrame:
             sql = """
 DECLARE
     @SupplierID int = ?
@@ -1112,13 +1113,13 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ SupplierID ])
+            return DbCmd(self.cnOrStr, sql, [ SupplierID ]).exec_df()
 
     class Territories:
         # table
-        Territories_TableName = 'Territories'
-        Territories_SchemaName = 'examples'
-        Territories_QualifiedName = '[examples].[Territories]'
+        TableName = 'Territories'
+        SchemaName = 'examples'
+        QualifiedName = '[examples].[Territories]'
         # columns
         TerritoryID = 'TerritoryID'
         TerritoryDescription = 'TerritoryDescription'
@@ -1127,7 +1128,7 @@ SELECT @@ROWCOUNT [rowcount];
         def __init__(self, cnOrStr: (Connection | str)):
             self.cnOrStr = cnOrStr
 
-        def insert(self, TerritoryID: str, TerritoryDescription: str, RegionID: int) -> DbCmd:
+        def insert(self, TerritoryID: str, TerritoryDescription: str, RegionID: int) -> DataFrame:
             sql = """
 DECLARE
     @TerritoryID nvarchar(40) = ?
@@ -1146,9 +1147,9 @@ VALUES (
     ,@RegionID
 );
 """
-            return DbCmd(self.cnOrStr, sql, [ TerritoryID, TerritoryDescription, RegionID ])
+            return DbCmd(self.cnOrStr, sql, [ TerritoryID, TerritoryDescription, RegionID ]).exec_df()
 
-        def update(self, TerritoryID: str, TerritoryDescription: str, RegionID: int) -> DbCmd:
+        def update(self, TerritoryID: str, TerritoryDescription: str, RegionID: int) -> DataFrame:
             sql = """
 DECLARE
     @TerritoryID nvarchar(40) = ?
@@ -1165,9 +1166,9 @@ UPDATE [examples].[Territories] SET
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ TerritoryID, TerritoryDescription, RegionID ])
+            return DbCmd(self.cnOrStr, sql, [ TerritoryID, TerritoryDescription, RegionID ]).exec_df()
 
-        def delete(self, TerritoryID: str) -> DbCmd:
+        def delete(self, TerritoryID: str) -> DataFrame:
             sql = """
 DECLARE
     @TerritoryID nvarchar(40) = ?
@@ -1180,5 +1181,5 @@ WHERE
 
 SELECT @@ROWCOUNT [rowcount];
 """
-            return DbCmd(self.cnOrStr, sql, [ TerritoryID ])
+            return DbCmd(self.cnOrStr, sql, [ TerritoryID ]).exec_df()
 

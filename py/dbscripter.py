@@ -25,9 +25,9 @@ class DbScripter:
         sql.write(";\n\n")
 
         p_out = [x for x in proc.params if x.is_output]
-        sql.write("SELECT @_return_value [@_return_value]")
+        sql.write("SELECT @_return_value [return_value]")
         for i,p in enumerate(p_out):
-            sql.write(f", {p.name} {quotename(p.name + "_out")}")
+            sql.write(f", {p.name} {quotename(sql_name(p.name + "_out"))}")
         sql.write(";\n")
 
         sql.seek(0)

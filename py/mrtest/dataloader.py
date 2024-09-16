@@ -23,8 +23,7 @@ class DataLoader:
             for c in df.columns:
                 data[c] = row[c]
             
-            cmd: DbCmd = callback(**data)
-            cmd.exec_no_read()
+            callback(**data)
 
     def load_csv_str(self, callback: callable, csv: str, separator: str = ',', names:Iterable=None, header: int = None, dtype: dict=None, date_format=None):
         """

@@ -10,7 +10,7 @@ s.add('b')
 
 # from generated.routines import Dev_Cyber_DatapoolDboRoutines
 
-# import mrtest.myconfig as myconfig
+# import myconfig
 # from mrtest import DbMock
 # from uuid import uuid4
 

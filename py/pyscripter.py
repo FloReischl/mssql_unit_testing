@@ -13,7 +13,7 @@ class PyScripter:
     def script_all_routines(self):
         for schema in self.model.schemas:
             class_name = f"{py_name(self.model.db_name.title())}{py_name(schema.name.title())}Routines"
-            print(self.script_schema_routines(class_name, schema))
+            print(self.script_schema_procedures(class_name, schema))
 
     def script_schema_tables(self, class_name: str, schema: Schema, fs: TextIOWrapper):
         model = self.model
@@ -25,6 +25,7 @@ class PyScripter:
         writeline("from pyodbc import Connection, BinaryNull")
         writeline("from datetime import datetime, date, time")
         writeline("from uuid import UUID")
+        writeline("from pandas import DataFrame")
         writeline()
         writeline(f"class {class_name}:")
 
@@ -36,9 +37,9 @@ class PyScripter:
             writeline(f"    class {py_name(table.name)}:")
 
             writeline("        # table")
-            writeline(f"        {t_name}_TableName = '{table.name}'")
-            writeline(f"        {t_name}_SchemaName = '{s_name}'")
-            writeline(f"        {t_name}_QualifiedName = '{quotename(s_name)}.{quotename(t_name)}'")
+            writeline(f"        TableName = '{table.name}'")
+            writeline(f"        SchemaName = '{s_name}'")
+            writeline(f"        QualifiedName = '{quotename(s_name)}.{quotename(t_name)}'")
             writeline("        # columns")            
             for col in table.columns:
                 writeline(f"        {py_name(col.name)} = '{col.name}'")
@@ -80,20 +81,20 @@ class PyScripter:
                         p_update += f", {p_name}: {type_def}"
                 p_update_names.append(p_name)
 
-            writeline(f"        def insert({p_insert}{p_insert_nullable}) -> DbCmd:")
+            writeline(f"        def insert({p_insert}{p_insert_nullable}) -> DataFrame:")
             writeline(f"            sql = \"\"\"\n{dbs.get_table_insert_sql(table)}\n\"\"\"")
-            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_insert_names)} ])")
+            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_insert_names)} ]).exec_df()")
             writeline()
-            writeline(f"        def update({p_update}{p_update_nullable}) -> DbCmd:")
+            writeline(f"        def update({p_update}{p_update_nullable}) -> DataFrame:")
             writeline(f"            sql = \"\"\"\n{dbs.get_table_update_sql(table)}\n\"\"\"")
-            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_update_names)} ])")
+            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_update_names)} ]).exec_df()")
             writeline()
-            writeline(f"        def delete({p_delete}) -> DbCmd:")
+            writeline(f"        def delete({p_delete}) -> DataFrame:")
             writeline(f"            sql = \"\"\"\n{dbs.get_table_delete_sql(table)}\n\"\"\"")
-            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_delete_names)} ])")
+            writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_delete_names)} ]).exec_df()")
             writeline()
 
-    def script_schema_routines(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):
+    def script_schema_procedures(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):
         ignore = ignore or set()
         model = self.model
 

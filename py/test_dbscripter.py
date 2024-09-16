@@ -2,20 +2,9 @@ import pytest
 from mrtest import DbModel
 from pyscripter import PyScripter
 from pyodbc import Connection
-import mrtest.myconfig as myconfig
+import myconfig
 
 class TestDbScripter:
-    # # script sandbox procs
-    # def test_script_sandbox_schema_routines(self, sandbox_connection):
-    #     model = DbModel(sandbox_connection)
-
-    #     schema = model.schemas.get_by_name("[dbo]")
-    #     scripter = PyScripter(model)
-
-    #     ignore = { 'sp_helpdiagramdefinition', 'sp_creatediagram', 'sp_renamediagram', 'sp_alterdiagram', 'sp_dropdiagram' }
-    #     with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\sandbox_routines.py', mode='w') as fs:
-    #         scripter.script_schema_routines("SandboxDboRoutines", schema, fs, ignore=ignore)
-
     # # script mock procedures
     # def test_script_sandbox_mock_procedures(self, examples_connection):
     #     model = DbModel(examples_connection)
@@ -45,14 +34,14 @@ class TestDbScripter:
     #         scripter.script_schema_tables("CyberDataPoolDboTables", schema, fs)
 
     # script cyber data pool procs
-    def test_script_examples_schema_routines(self, examples_connection: Connection):
+    def test_script_examples_schema_procedures(self, examples_connection: Connection):
         model = DbModel(examples_connection)
         schema = model.schemas.get_by_name("[examples]")
         scripter = PyScripter(model)
 
         ignore = { 'sp_helpdiagramdefinition', 'sp_creatediagram', 'sp_renamediagram', 'sp_alterdiagram', 'sp_dropdiagram' }
-        with open('C:\\dev\\src\\mssql_unit_testing\\py\\generated\\examples_routines.py', mode='w') as fs:
-            scripter.script_schema_routines("TstDbExamplesRoutines", schema, fs, ignore=ignore)
+        with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\examples_procedures.py', mode='w') as fs:
+            scripter.script_schema_procedures("TstDbExamplesProcedures", schema, fs, ignore=ignore)
 
     # script cyber tables
     def test_script_examples_schema_tables(self, examples_connection: Connection):
@@ -60,7 +49,7 @@ class TestDbScripter:
         schema = model.schemas.get_by_name("[examples]")
         scripter = PyScripter(model)
 
-        with open('C:\\dev\\src\\mssql_unit_testing\\py\\generated\\examples_tables.py', mode='w') as fs:
+        with open('C:\\dev\\src\\my\\mssql_unit_testing\\py\\generated\\examples_tables.py', mode='w') as fs:
             scripter.script_schema_tables("TstDbExamplesTables", schema, fs)
 
 if __name__ == '__main__':
