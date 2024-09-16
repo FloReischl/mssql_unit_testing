@@ -1,12 +1,17 @@
-from mrtest import DbCmd
+import pandas as pd
+import sqlalchemy as sa
+from sqlalchemy import create_engine, text
 
 
 
-s = set()
-s.add('a')
-s.add('b')
-
-
+engine = create_engine("mssql+pyodbc://sqlaircyber2.munichre.com:1433/dev_sandbox?driver=ODBC+Driver+17+for+SQL+Server")
+with engine.connect() as cn:
+    with cn.execute(text("execute usp_get_city @city_id = :city_id"), { "city_id": 666 }) as result:
+        cn.close()
+        df = pd.DataFrame(result)
+        result.close()
+        print(df)
+        pass
 
 # from generated.routines import Dev_Cyber_DatapoolDboRoutines
 

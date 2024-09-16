@@ -75,7 +75,9 @@ class PyScripter:
                         p_insert_nullable += f", {p_name}: {type_def} = {nv}"
                         p_insert_names.append(p_name)
                         p_update_nullable += f", {p_name}: {type_def} = {nv}"
-                    elif not col.is_identity:
+                    elif col.is_identity:
+                        p_update += f", {p_name}: {type_def}"
+                    else:
                         p_insert += f", {p_name}: {type_def}"
                         p_insert_names.append(p_name)
                         p_update += f", {p_name}: {type_def}"
@@ -92,6 +94,50 @@ class PyScripter:
             writeline(f"        def delete({p_delete}) -> DataFrame:")
             writeline(f"            sql = \"\"\"\n{dbs.get_table_delete_sql(table)}\n\"\"\"")
             writeline(f"            return DbCmd(self.cnOrStr, sql, [ {", ".join(p_delete_names)} ]).exec_df()")
+            writeline()
+
+    def script_alchemy_schema_procedures(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):
+        ignore = ignore or set()
+        model = self.model
+
+        def writeline(s: str = None):
+            fs.write(f"{s or ''}\n")
+        def write(s: str = None):
+            fs.write(f"{s or ''}")
+        
+        # writeline("from mrtest import DbCmd")
+        # writeline("from pyodbc import Connection")
+        writeline("from sqlalchemy import Connection, CursorResult, text")
+        writeline("from mrtest import get_alchemy_connection")
+        writeline("from typing import Any")
+        writeline("from datetime import datetime, date, time")
+        writeline("from uuid import UUID")
+        writeline()
+        writeline(f"class {class_name}:")
+        writeline("    def __init__(self, cnOrStr: (Connection | str)):")
+        writeline("        self.con = get_alchemy_connection(cnOrStr)")
+        writeline()
+        # writeline("    def custom_sql(self, sql: str, params: Any = None):")
+        # writeline("        return DbCmd(self.cnOrStr, sql, params)")
+        writeline()
+
+        procs = [x for x in model.get_procedures() if x.schema_id == schema.schema_id]
+        dbs = DbScripter(self.model)
+        for proc in procs:
+            if proc.name in ignore or proc.unique_name in ignore:
+                continue
+            pnames = []
+            write(f"    def {py_name(proc.name)}(self")
+            for i,param in enumerate(proc.params):
+                pname = py_name(param.name)
+                pnames.append("'" + pname + "': " + pname)
+                write(", ")
+                write(f"{pname}: {self._py_type_def(param.sys_type)}")
+            writeline(") -> CursorResult:")
+            writeline("        sql = \"\"\"")
+            writeline(dbs.get_alchemy_exec_proc_sql(proc).strip())
+            writeline("\"\"\"")
+            writeline(f"        return self.con.execute(text(sql), {{ {", ".join(pnames)} }})")
             writeline()
 
     def script_schema_procedures(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):

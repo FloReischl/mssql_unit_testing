@@ -5,7 +5,6 @@ import pandas as pd
 from mrtest import DataLoader
 from generated.examples_procedures import TstDbExamplesProcedures
 from generated.examples_tables import TstDbExamplesTables
-import linq
 
 Shippers = TstDbExamplesTables.Shippers
 

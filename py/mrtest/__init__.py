@@ -10,6 +10,7 @@ from .schema import Schema
 from .systype import SysType, TypeCode
 from .sql import *
 from .table import Table
-from .utils import quote as quotename, py_name, sql_name
+from .utils import quote as quotename, py_name, sql_name, get_alchemy_connection
 from .dbmock import DbMock
 from .dataloader import DataLoader
+from .coninfo import ConInfo

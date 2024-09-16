@@ -1,4 +1,5 @@
 from .systype import TypeCode, SysType
+from sqlalchemy import create_engine, Connection as SAConnection
 
 _alpha_chars = { 
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -100,4 +101,10 @@ def py_name(name: str):
         
     return "".join(chars)
 
+def get_alchemy_connection(urlOrCnStr : (str | SAConnection)) -> SAConnection:
+    if isinstance(urlOrCnStr, SAConnection):
+        return urlOrCnStr
+    else:
+        engine = create_engine(url=urlOrCnStr)
+        return engine.connect()
 

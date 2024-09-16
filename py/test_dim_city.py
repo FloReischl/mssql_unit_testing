@@ -1,40 +1,43 @@
 import pytest
+import pandas as pd
 from pyodbc import Connection
-from mrtest import DbMock, DbCmd
-from generated.sandbox_routines import SandboxDboRoutines
+from sqlalchemy import Connection as SAConnection
+from sqlalchemy import create_engine, text
+from mrtest import DbMock, DbCmd, DataLoader
+# from generated.cyberdatapool_procedures import CyberDataPoolDboProcedures
+# from generated.cyberdatapool_tables import CyberDataPoolDboTables
+from generated.cyberdatapool_alchemy_procedures import CyberDataPoolDboAlchemyProcedures
+from io import StringIO
+
 
 class Test_Dim_City:
-    # raw odbc
-    # def test_get_city_odbc(self, sandbox_connection: Connection):
-    #     with sandbox_connection.execute('execute usp_get_city @city_id = ?', [ 24379 ]) as cur:
-    #         rows = cur.fetchall()
-    #         assert all(x.City == 'München' for x in rows)
-    #         assert len(rows) == 1
+    def test_merge_dim_city(self, cdp_sa_con: SAConnection, cdp_sa_mock: DbMock):
+        # arrange
+        cdp_sa_mock.mock_table("dbo", "Dim_City")
+        cdp_sa_mock.mock_table("stg", "Dim_City")
 
-    # # raw dataframe
-    # def test_get_city_df(self, sandbox_connection):
-    #     df = DbCmd(sandbox_connection, 'execute usp_get_city @city_id = ?', [ 24379 ]).exec_df()
-    #     assert all(df.City == 'München')
-    #     assert len(df) == 1
+        csv = StringIO("""
+City,Create_Time,Change_Time,Changed_By
+Frankfurt,2024-09-01,2024-09-01,test
+Berlin,2024-09-01,2024-09-01,test
+Köln,2024-09-01,2024-09-01,test
+""")
+        df = pd.read_csv(csv, header=0)
+        df.to_sql(schema="dbo", name="Dim_City", con=cdp_sa_con, if_exists='append', index=False)
 
-    # object oriented proxy
-    def test_get_city(self, sandbox_routines: SandboxDboRoutines):
-        df = sandbox_routines.usp_get_city(city_id=24379).df
-        assert all(df.City == 'München')
-        assert len(df) == 1
+        csv = StringIO("""
+Session_ID,Crud_Operation,City_ID,City
+0c57d525-0cfe-42ab-b789-4d1247bf8c7c,I,-1,München
+0c57d525-0cfe-42ab-b789-4d1247bf8c7c,U,2,Hamburg
+0c57d525-0cfe-42ab-b789-4d1247bf8c7c,D,3,Köln
+""")
+        df = pd.read_csv(csv, header=0)
+        df.to_sql(schema="stg", name="Dim_City", con=cdp_sa_con, if_exists='append', index=False)
 
-    def test_mock_insert(self, sandbox_routines: SandboxDboRoutines , sandbox_mock: DbMock):
-        sandbox_mock.mock_table("dbo", "Dim_City")
-        dbx = sandbox_mock.dbx
-        df = dbx.get_df("INSERT INTO Dim_City (City, Create_Time, Change_Time, Changed_By) VALUES ('Rametnach', getdate(), getdate(), 'flo');")
-
-        df = dbx.get_df("SELECT * FROM Dim_City")
-        assert len(df) == 1
-        assert all(df.City == 'Rametnach')
-
-
+        procs = CyberDataPoolDboAlchemyProcedures(cdp_sa_con)
+        procs.usp_merge_Dim_City('0c57d525-0cfe-42ab-b789-4d1247bf8c7c', 'City')
 
 if __name__ == '__main__':
     pytest.main([__file__
-                , '-k', 'test_mock_insert'
+                # , '-k', 'test_mock_insert'
                  ])
