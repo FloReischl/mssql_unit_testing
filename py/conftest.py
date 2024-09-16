@@ -10,22 +10,49 @@ from generated.examples_procedures import TstDbExamplesProcedures
 ####################################################################
 # northwind examples
 
-_examples_cnstr = 'DRIVER={SQL Server};SERVER=sqlaircyber2.munichre.com;DATABASE=dev_sandbox;Trusted_Connection=Yes;'
+# _examples_cnstr = 'DRIVER={SQL Server};SERVER=sqlaircyber2.munichre.com;DATABASE=dev_sandbox;Trusted_Connection=Yes;'
 _examples_cn = None
 
+_examples_coninfo = ConInfo(".", "testdb")
+
+_examples_sa_con = None
+
+@fixture
+def examples_sa_con(request: FixtureRequest):
+    from sqlalchemy import create_engine
+    global _examples_sa_con, _examples_coninfo
+
+    close = False
+    if _examples_sa_con == None:
+        url = _examples_coninfo.alchemy_url()
+        engine = create_engine(url)
+        _examples_sa_con = engine.connect()
+        close = True
+        mock = DbMock(_examples_sa_con)
+        mock.reset_database()
+
+    def tear_down():
+        global _examples_sa_con
+        if close:
+            _examples_sa_con.close()
+            _examples_sa_con = None
+    request.addfinalizer(tear_down)
+
+    return _examples_sa_con
+
 def _create_examples_connection() -> Connection:
-    return odbc_connect(_examples_cnstr)
+    return odbc_connect(_examples_coninfo.odbc_cnstr())
 
 @fixture
 def examples_connection(request: FixtureRequest):
-    global _examples_cn, _examples_cnstr
+    global _examples_cn
 
     close = False
     if _examples_cn == None:
         _examples_cn = _create_examples_connection() #odbc_connect(_examples_cnstr)
         close = True
-        mock = DbMock(_examples_cn)
-        mock.reset_database()
+        # mock = DbMock(_examples_cn)
+        # mock.reset_database()
 
     def tear_down():
         global _examples_cn
@@ -41,8 +68,8 @@ def examples_procs(examples_connection):
     return TstDbExamplesProcedures(examples_connection)
 
 @fixture
-def examples_mock(request: FixtureRequest, examples_connection):
-    result = DbMock(examples_connection)
+def examples_mock(request: FixtureRequest, examples_sa_con):
+    result = DbMock(examples_sa_con)
     
     def tear_down():
         result.restore_tables()

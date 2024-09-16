@@ -107,4 +107,3 @@ def get_alchemy_connection(urlOrCnStr : (str | SAConnection)) -> SAConnection:
     else:
         engine = create_engine(url=urlOrCnStr)
         return engine.connect()
-

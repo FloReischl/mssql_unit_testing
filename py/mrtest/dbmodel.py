@@ -12,7 +12,8 @@ from .procedure import Procedure, ProcParameter
 from .table import Table, Column
 from typing import Any
 from .dbcmd import DbCmd
-from pyodbc import Connection
+# from pyodbc import Connection
+from sqlalchemy import Connection
 
 class DbModel:
     """

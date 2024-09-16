@@ -105,9 +105,9 @@ class PyScripter:
         def write(s: str = None):
             fs.write(f"{s or ''}")
         
-        # writeline("from mrtest import DbCmd")
+        writeline("from mrtest import DbCmd")
         # writeline("from pyodbc import Connection")
-        writeline("from sqlalchemy import Connection, CursorResult, text")
+        writeline("from sqlalchemy import Connection, text")
         writeline("from mrtest import get_alchemy_connection")
         writeline("from typing import Any")
         writeline("from datetime import datetime, date, time")
@@ -133,11 +133,11 @@ class PyScripter:
                 pnames.append("'" + pname + "': " + pname)
                 write(", ")
                 write(f"{pname}: {self._py_type_def(param.sys_type)}")
-            writeline(") -> CursorResult:")
+            writeline(") -> DbCmd:")
             writeline("        sql = \"\"\"")
             writeline(dbs.get_alchemy_exec_proc_sql(proc).strip())
             writeline("\"\"\"")
-            writeline(f"        return self.con.execute(text(sql), {{ {", ".join(pnames)} }})")
+            writeline(f"        return DbCmd(self.con, sql, {{ {", ".join(pnames)} }})")
             writeline()
 
     def script_schema_procedures(self, class_name: str, schema: Schema, fs: TextIOWrapper, ignore: set = None):

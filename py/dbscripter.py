@@ -20,7 +20,7 @@ class DbScripter:
         for i, p in enumerate(proc.params):
             sql.write("\n    ")
             if i != 0: sql.write(",")
-            sql.write(f"{p.name} = :{sql_name(p.name)}")
+            sql.write(f"{p.name} = {p.name}")
             if p.is_output: sql.write(" OUTPUT")
         sql.write(";\n\n")
 
