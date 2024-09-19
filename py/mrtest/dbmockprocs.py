@@ -1,5 +1,5 @@
 from mrtest import DbCmd
-from pyodbc import Connection
+from sqlalchemy import Connection
 from typing import Any
 from datetime import datetime, date, time
 from uuid import UUID

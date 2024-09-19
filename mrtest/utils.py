@@ -1,3 +1,4 @@
+from typing import Iterable
 from .systype import TypeCode, SysType
 from sqlalchemy import create_engine, Connection
 from pytest import FixtureRequest
@@ -103,33 +104,61 @@ def py_name(name: str):
     return "".join(chars)
 
 def fixture_connection(request: FixtureRequest, cn_candidate: Connection, url: str):
+    """
+    Helper function to setup a pytest.fixture that creates, reuses and closes a single connection instance
+
+    Paramters
+    ---------
+    request         : FixtureRequest
+                      The fixture request from conftest.py, to register tear-down
+    cn_candidate    : Connection
+                      A candidate connection that might already be available and reusable
+    url             : str
+                      The sqlalchemy connection url to create a new connection
+
+    Returns
+    -------
+    (Connection): an active connection
+    """
     from .dbmock import DbMock
 
-    close = False
     cn = cn_candidate
-    if cn == None:
-        engine = create_engine(url)
-        cn = engine.connect()
-        close = True
+
+    def tear_down():
+        nonlocal cn
+        cn.close()
+
+    if cn == None or cn.closed:
+        cn = create_engine(url).connect()
+
         mock = DbMock(cn)
         mock.reset_database()
         cn.commit()
 
-    def tear_down():
-        nonlocal cn
-        if close:
-            cn.close()
-            cn = None
-    request.addfinalizer(tear_down)
+        request.addfinalizer(tear_down)
 
     return cn
 
 def fixture_mock(request: FixtureRequest, cn: Connection):
+    """
+    Helper function to setup a pytest.fixture that creates a (DbMock)
+
+    Paramters
+    ---------
+    request         : FixtureRequest
+                      The fixture request from conftest.py, to register tear-down
+    cn              : Connection
+                      A connection to be used for the mock
+
+    Returns
+    -------
+    (Connection): an active connection
+    """
     from .dbmock import DbMock
 
     result = DbMock(cn)
     def tear_down():
-        result.restore_tables()
+        result.restore_all_tables()
         cn.commit()
     request.addfinalizer(tear_down)
 

@@ -16,13 +16,13 @@ class _InnerMock:
         with self.cn.execute(text("EXECUTE mrtest.usp_mock_table @schema_name = :schema_name, @table_name = :table_name"), { "schema_name": schema, "table_name": name }):
             self.mocked_tables.add(key)
 
-    def restore_tables(self):
+    def restore_all_tables(self):
         removed = []
         exlist = list[Exception]()
 
         for key in self.mocked_tables:
             try:
-                self.unmock_table(schema=key[0], name=key[1])
+                self.restore_table(schema=key[0], name=key[1])
                 removed.append(key)
             except Exception as ex:
                 exlist.append(ex)
@@ -41,7 +41,7 @@ class _InnerMock:
             for row in cur_res.fetchall():
                 warn(f"Fixed table {row.schema_name}.{row.table_name}")
 
-    def unmock_table(self, schema: str, name: str):
+    def restore_table(self, schema: str, name: str):
         with self.cn.execute(text("EXECUTE mrtest.usp_restore_table @schema_name = :schema_name, @table_name = :table_name"), { "schema_name": schema, "table_name": name }):
             pass
     
@@ -49,38 +49,58 @@ class _InnerMock:
         return (schema, name)
 
 class DbMock:
+    """
+    Mock database objects for testing.
+    """
     def __init__(self, cn: (Connection | str)) -> None:
         self._inner = _InnerMock(cn)
         self.cn = self._inner.cn
 
     def mock_table(self, schema: str, name: str):
+        """
+        Mock a specific database table
+        """
         self._inner.mock_table(schema, name)
 
-    def restore_tables(self):
-        self._inner.restore_tables()
+    def restore_all_tables(self):
+        """
+        restore all tables that where previously mocked.
+        """
+        self._inner.restore_all_tables()
     
-    def unmock_table(self, schema: str, name: str):
-        self._inner.unmock_table(schema=schema, name=name)
+    def restore_table(self, schema: str, name: str):
+        """
+        restore a specific table.
+        """
+        self._inner.restore_table(schema=schema, name=name)
 
     def reset_database(self):
+        """
+        Rest the full database to restore possibly not correctly restored tables from previous test runs.
+        
+        This happens sometimes, when a table was mocked within a test but the test debugger was stopped without rstoring the table.
+        """
         self._inner.reset_database()
 
 class DbMockScope:
+    """
+    Mock database objects for testing within a :with scope
+    """
     def __init__(self, cn: (Connection | str)) -> None:
         self.inner = _InnerMock(cn)
 
     def mock_table(self, schema: str, name: str):
         self.inner.mock_table(schema, name)
 
-    def restore_all(self):
-        self.inner.restore_tables()
+    def restore_all_tables(self):
+        self.inner.restore_all_tables()
     
-    def unmock_table(self, schema: str, name: str):
-        self.inner.unmock_table(schema=schema, name=name)
+    def restore_table(self, schema: str, name: str):
+        self.inner.restore_table(schema=schema, name=name)
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.inner.restore_tables()
+        self.inner.restore_all_tables()
 

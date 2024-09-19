@@ -26,18 +26,23 @@ class PyScripter:
         def write(s: str = None):
             fs.write(f"{s or ''}")
         
-        writeline("from mrtest import DbCmd")
+        writeline("from mrtest import DbCmd, Session")
         writeline("from sqlalchemy import Connection, text, create_engine")
         writeline("from typing import Any")
         writeline("from datetime import datetime, date, time")
         writeline("from uuid import UUID")
         writeline()
         writeline(f"class {class_name}:")
-        writeline("    def __init__(self, cnOrUrl: (Connection | str)):")
-        writeline("        self.cn = cnOrUrl if isinstance(cnOrUrl, Connection) else create_engine(str(cnOrUrl)).connect()")
+        # writeline("    def __init__(self, cnOrUrl: (Connection | str)):")
+        # writeline("        self.cn = cnOrUrl if isinstance(cnOrUrl, Connection) else create_engine(str(cnOrUrl)).connect()")
+        writeline("    def __init__(self, cn: (Connection | str)):")
+        writeline("        if isinstance(cn, Connection): self.cn = cn")
+        writeline("        elif isinstance(cn, Session): self.cn = cn.cn")
+        writeline("        else: create_engine(str(cn)).connect()")
         writeline()
 
         procs = [x for x in model.get_procedures() if x.schema_id == schema.schema_id]
+        procs.sort(key=lambda x: repr(x))
         dbs = DbScripter(self.model)
         for proc in procs:
             if proc.name in ignore or proc.unique_name in ignore:
